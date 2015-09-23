@@ -91,6 +91,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         new ConnectionListenerTask().execute();
     }
 
+
+
+
     protected void prepareView(View view) {
         sEnableServer = (Switch) view.findViewById(R.id.sw_enable_server);
         sEnableServer.setEnabled(true);
@@ -195,5 +198,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 sEnableServer.setChecked(false);
             }
         }
+    }
+
+
+    private void disableServer(){
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForDisconnect(getActivity());
+        task.enableSU(enableSU);
+        task.execute();
+
+        NotificationManager notify = (NotificationManager)context.
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        context.stopService(new Intent(getActivity(), ServerService.class));
     }
 }

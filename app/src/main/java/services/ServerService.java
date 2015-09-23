@@ -16,6 +16,7 @@ import android.support.v4.app.NotificationCompat;
 
 import org.teachervirus.R;
 
+import ui.ConsoleActivity;
 import ui.SettingActivity;
 
 
@@ -60,7 +61,7 @@ public class ServerService extends Service {
                         .setContentTitle("DroidPHP service started")
                         .setContentText("Web Service started");
 
-        Intent notificationIntent = new Intent(this, SettingActivity.class);
+        Intent notificationIntent = new Intent(this, ConsoleActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(

@@ -2,13 +2,19 @@ package ui;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.nfc.Tag;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -16,6 +22,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import org.teachervirus.Constants;
 import org.teachervirus.R;
 
 import java.io.File;
@@ -30,6 +37,13 @@ import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.List;
+
+import common.utils.FileUtils;
+import eu.chainfire.libsuperuser.Shell;
+import services.ServerService;
+import tasks.CommandTask;
+import tasks.RepoInstallerTask;
 
 // Credits:
 // https://gist.github.com/rduplain/2638913
@@ -54,6 +68,8 @@ public class FullscreenActivity extends Activity {
     private static final int DEFAULT_COUNTDOWN_TIME = 60 * 1000; // one minute
     private static final int DEFAULT_INTERVAL = 5000; // 5 second
 
+    private SharedPreferences preferences;
+
     private CountDownTimer countDownTimer;
 
     private static String file_url = "https://www.github.com/OATSEA/getinfected/zipball/master";  // File url to download - github
@@ -64,20 +80,50 @@ public class FullscreenActivity extends Activity {
     private static String up = htdocs + File.separator + "play" + File.separator + "up.html";
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-
+        preferences = PreferenceManager.
+                getDefaultSharedPreferences(this);
 
         countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
         countDownTimer.start();
         showDialog();
 
         checkHtdocsOK();
-        copyAssets();
+        if(!isGetInfectedExists()){
+            copyAssets();
+        }
+
+
+        if (preferences.getBoolean("enable_server_on_app_startup", false)) {
+
+
+            startService(new Intent(FullscreenActivity.this, ServerService.class));
+
+            final boolean enableSU = preferences.getBoolean("run_as_root", false);
+            final String execName = preferences.getString("use_server_httpd", "lighttpd");
+            final String bindPort = preferences.getString("server_port", "8080");
+
+            CommandTask task = CommandTask.createForConnect(FullscreenActivity.this, execName, bindPort);
+            task.enableSU(enableSU);
+            task.execute();
+        }
+        if (!FileUtils.checkIfExecutableExists()) {
+            RepoInstallerTask task = new RepoInstallerTask(FullscreenActivity.this);
+            task.setOnRepoInstalledListener(new RepoInstallerTask.OnRepoInstalledListener() {
+                @Override
+                public void repoInstalled() {
+                    Log.e(TAG,"Repo installed");
+                    new ConnectionListenerTask().execute();
+                }
+            });
+            task.execute("", Constants.INTERNAL_LOCATION.concat("/"));
+        }else{
+            new ConnectionListenerTask().execute();
+        }
+
         myWebView = (WebView) findViewById(R.id.webview);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -140,6 +186,12 @@ public class FullscreenActivity extends Activity {
     protected void onPause() {
         super.onPause();
         dismissDialog();
+    }
+
+
+    private boolean isGetInfectedExists(){
+        File file = new File(htdocs+File.separator+"getinfected.php");
+        return file.exists();
     }
 
     private void copyAssets() {
@@ -267,9 +319,13 @@ public class FullscreenActivity extends Activity {
         if (myWebView.canGoBack()) {
             myWebView.goBack();
         } else {
+            disableServer();
             super.onBackPressed();
+
         }
     } // END onBackPressed
+
+
 
 
     public class MyTimer extends CountDownTimer {
@@ -354,5 +410,84 @@ public class FullscreenActivity extends Activity {
 
     }
 
-    } // END CLASS FullScreenActivity
+
+    private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            String FIND_PROCESS = String.format(
+                    "%s ps | %s grep \"components\"",
+                    Constants.BUSYBOX_SBIN_LOCATION,
+                    Constants.BUSYBOX_SBIN_LOCATION);
+
+            List<String> rc = Shell.SH.run(FIND_PROCESS);
+
+            boolean serverListing;
+            boolean phpListing;
+            boolean mysqlListing;
+
+            String shellOutput = "";
+            for (String buf : rc.toArray(new String[rc.size()])) {
+                shellOutput += buf;
+            }
+
+            serverListing = (shellOutput.contains("lighttpd") || shellOutput.contains("nginx"));
+            phpListing = shellOutput.contains("php-cgi");
+            mysqlListing = shellOutput.contains("mysqld");
+
+            if (serverListing && phpListing && mysqlListing) {
+
+                //publishProgress("OK");
+                return true;
+            } else {
+                // publishProgress("ERROR");
+                return false;
+            }
+            //return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            Log.e(TAG, "Server started :" + aBoolean);
+            startService(new Intent(FullscreenActivity.this, ServerService.class));
+            executeSu();
+
+
+
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+
+        }
+    }
+
+
+    private void executeSu(){
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForConnect(this, execName, bindPort);
+        task.enableSU(enableSU);
+        task.execute();
+    }
+
+    private void disableServer(){
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForDisconnect(this);
+        task.enableSU(enableSU);
+        task.execute();
+
+        NotificationManager notify = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        stopService(new Intent(this, ServerService.class));
+    }
+
+} // END CLASS FullScreenActivity
 

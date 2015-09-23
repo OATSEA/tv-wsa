@@ -69,7 +69,7 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
 
         switch (fragmentCode) {
             case 0:
-                return new HomeFragmentNew();
+                return new HomeFragment();
             case R.id.ll_mysql_shell:
                 return new QueryFragment();
             case R.id.ll_package:
