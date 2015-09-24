@@ -26,10 +26,13 @@ import org.teachervirus.Constants;
 import org.teachervirus.R;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -44,6 +47,7 @@ import eu.chainfire.libsuperuser.Shell;
 import services.ServerService;
 import tasks.CommandTask;
 import tasks.RepoInstallerTask;
+import utils.Utils;
 
 // Credits:
 // https://gist.github.com/rduplain/2638913
@@ -96,6 +100,8 @@ public class FullscreenActivity extends Activity {
             copyAssets();
         }
 
+
+       writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
 
         if (preferences.getBoolean("enable_server_on_app_startup", false)) {
 
@@ -319,7 +325,7 @@ public class FullscreenActivity extends Activity {
         if (myWebView.canGoBack()) {
             myWebView.goBack();
         } else {
-            disableServer();
+
             super.onBackPressed();
 
         }
@@ -348,7 +354,7 @@ public class FullscreenActivity extends Activity {
                             public void run() {
                                 dismissDialog();
                                 openPage(getinfected_url);
-                                Toast.makeText(FullscreenActivity.this,"Get Infected Loaded",Toast.LENGTH_LONG).show();
+
                             }
                         });
                     }
@@ -487,6 +493,26 @@ public class FullscreenActivity extends Activity {
                 getSystemService(Context.NOTIFICATION_SERVICE);
         notify.cancel(143);
         stopService(new Intent(this, ServerService.class));
+    }
+
+
+    private void writeIpAddress(String ipAddress){
+
+        File ipFile = new File(htdocs,"IP.txt");
+        try {
+            FileOutputStream f = new FileOutputStream(ipFile);
+            PrintWriter pw = new PrintWriter(f);
+            pw.println(ipAddress);
+            pw.flush();
+            pw.close();
+            f.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.i(TAG, "******* File not found. Did you" +
+                    " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 } // END CLASS FullScreenActivity

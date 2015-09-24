@@ -80,6 +80,7 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
 //                return null;
             case R.id.ll_about:
                 return new AboutFragment();
+
             default:
                 return null;
         }

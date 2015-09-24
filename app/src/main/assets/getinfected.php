@@ -310,8 +310,8 @@
     </script>
 <?php
     $debug = (isset($_POST['show_debug']) ? $_POST['show_debug'] : (is_dir(ROOT_DIR."/admin") ? DEBUG_TEXT : 1));
-    $bChmod = (isset($_POST['chmod']) ? $_POST['chmod'] : (is_dir(ROOT_DIR."/admin") ? 1 : 0 ));
-    $_SESSION['chmod']=$bChmod;
+    $bChmod = isset($_POST['chmod']) ? $_POST['chmod'] : 0;
+    $_SESSION['chmod'] = $bChmod;
     $installed=0;
     
     $_SESSION['isValidation']['flag'] = TRUE;
@@ -504,7 +504,7 @@
                             }
 
                         } else {
-                            if($debug) {echo "<p>$pathFile is a file</p>"; }
+                            //if($debug) {echo "<p>$pathFile is a file</p>"; }
 
                             // $currentFile = realpath($file); // current location
                             $currentFile = $pathFile;
@@ -527,7 +527,7 @@
                             if (rename($currentFile , $newFile)) {
                                 //if($debug) { echo "<p>Moved $currentFile to $newFile</p>"; }
                             } else {
-                                if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
+                                //if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
                                 $result = false;
                             } // END rename 
 

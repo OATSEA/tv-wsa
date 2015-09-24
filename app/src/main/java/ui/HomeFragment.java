@@ -104,6 +104,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         //view.findViewById(R.id.ll_update).setOnClickListener(this);
         view.findViewById(R.id.ll_about).setOnClickListener(this);
         view.findViewById(R.id.ll_uninstall).setOnClickListener(this);
+        view.findViewById(R.id.ll_teacher_virus).setOnClickListener(this);
     }
 
     @Override
@@ -111,7 +112,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if (view.getId() == R.id.ll_uninstall) {
             CommandTask task = CommandTask.createForUninstall(context);
             task.execute();
-        } else
+        } else if(view.getId() == R.id.ll_teacher_virus){
+            Intent fullScreenIntent = new Intent(getActivity(), FullscreenActivity.class);
+            fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            getActivity().startActivity(fullScreenIntent);
+        }else
             sInflateCallback.setOnViewIdReceived(view.getId());
     }
 
