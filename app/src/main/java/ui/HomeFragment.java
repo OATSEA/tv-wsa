@@ -92,7 +92,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
 
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().finish();
+    }
 
     protected void prepareView(View view) {
         sEnableServer = (Switch) view.findViewById(R.id.sw_enable_server);
