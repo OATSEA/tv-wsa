@@ -811,16 +811,17 @@
             }
             else 
             {
-                if ($ip=="no") {
+                if ($ip=="no")
+                {
                     // Download from github zipball/master as no IP address set
                     $geturl = (!empty($sBranchName) && isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "https://github.com/$username/$repo/zipball/$sBranchName/" : "https://github.com/$username/$repo/zipball/master/";
                     $sGetInfectedGetUrl = "https://github.com/$username/getinfected/zipball/master/";
-                    copy($sGetInfectedGetUrl,$sInfectedZipFile);
-                } else {
+                }
+                else
+                {
                     // as IP address has been set attempt download from IP address
                    $geturl = empty($nPort) ? "http://$ip/$zipfile" : "http://$ip:$nPort/$zipfile";
                    $sGetInfectedGetUrl = empty($nPort) ? "http://$ip/$sInfectedZipFile" : "http://$ip:$nPort/$sInfectedZipFile";
-                   copy($sGetInfectedGetUrl,$sInfectedZipFile);
                 }
                 // TRY DOWNLOAD via copy
                 if ($debug) { echo "<h2>Download Files</h2>
@@ -829,7 +830,7 @@
                 // get following error on MAC: 
                 // Warning: copy(): SSL operation failed with code 1.
                 $copyflag = copy($geturl,$zipfile);
-                
+                                
                 if ($copyflag === TRUE) 
                 {
                     if($debug) { echo "<h3>Download Succeeded</h3>"; }
@@ -1297,45 +1298,45 @@ if($_SESSION['isValidation']['flag'] == 1)
             <div class="full-widthdebug">
                 <input type="button" id="show_settings" value="Show Advanced Settings" onclick="toggleVisibility('main','show_settings');">
             </div>
-        <div id="main" style="display:none">
-                <div class="full-widthdebug">
-                    <input type="button" value="Update Get Infected ?" onclick="location.href='tv/updategetinfected/';">
-                </div>
+            <div id="main" style="display:none">
                 <?php 
-                    if (is_dir(ROOT_DIR."/admin")) 
-                    {
+                if (is_dir(ROOT_DIR."/admin")) 
+                {
                 ?>
-                <div class="full-widthdebug">
-                    <div class="text-field">
-                        <b>Remove Current Installation?</b>
-                        <input type="checkbox" name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '0' : '1'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
-                    </div>
-                </div>
-                <div class="full-widthdebug">
-                    <input type="button" id="show_delete_option" value="Show Options" onclick="toggleDeleteFile('delete_file','show_delete_option');">
-                </div>
-                <div id="delete_file" style="display:none">
                     <div class="full-widthdebug">
-                        <input type="checkbox" name="delete_data" id="delete_data" value="<?php echo isset($_POST['delete_data']) ? $_POST['delete_data'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_data']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_data');" >Delete Data
+                        <input type="button" value="Update Get Infected ?" onclick="location.href='tv/updategetinfected/';">
                     </div>
                     <div class="full-widthdebug">
-                        <input type="checkbox" name="delete_payload" id="delete_payload" value="<?php echo isset($_POST['delete_payload']) ? $_POST['delete_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_payload');">Delete Payloads
+                        <div class="text-field">
+                            <b>Remove Current Installation?</b>
+                            <input type="checkbox" name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '0' : '1'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
+                        </div>
                     </div>
                     <div class="full-widthdebug">
-                        <input type="checkbox" name="admin_payload" id="admin_payload" value="<?php echo isset($_POST['admin_payload']) ? $_POST['admin_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['admin_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('admin_payload');">Delete Admin Payloads
+                        <input type="button" id="show_delete_option" value="Show Options" onclick="toggleDeleteFile('delete_file','show_delete_option');">
+                    </div>
+                    <div id="delete_file" style="display:none">
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_data" id="delete_data" value="<?php echo isset($_POST['delete_data']) ? $_POST['delete_data'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_data']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_data');" >Delete Data
+                        </div>
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_payload" id="delete_payload" value="<?php echo isset($_POST['delete_payload']) ? $_POST['delete_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_payload');">Delete Payloads
+                        </div>
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="admin_payload" id="admin_payload" value="<?php echo isset($_POST['admin_payload']) ? $_POST['admin_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['admin_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('admin_payload');">Delete Admin Payloads
+                        </div>
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_content" id="delete_content" value="<?php echo isset($_POST['delete_content']) ? $_POST['delete_content'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_content']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_content');" >Delete Content
+                        </div>
                     </div>
                     <div class="full-widthdebug">
-                        <input type="checkbox" name="delete_content" id="delete_content" value="<?php echo isset($_POST['delete_content']) ? $_POST['delete_content'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_content']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_content');" >Delete Content
+                        <div class="text-field">
+                            <b>Download Latest Version?</b>
+                            <input type="checkbox" name="download_latest_version" id="download_latest_version" value="<?php echo isset($_POST['download_latest_version']) ? $_POST['download_latest_version'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['download_latest_version']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('download_latest_version');">
+                        </div>
                     </div>
-                </div>
-                <div class="full-widthdebug">
-                    <div class="text-field">
-                        <b>Download Latest Version?</b>
-                        <input type="checkbox" name="download_latest_version" id="download_latest_version" value="<?php echo isset($_POST['download_latest_version']) ? $_POST['download_latest_version'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['download_latest_version']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('download_latest_version');">
-                    </div>
-                </div>
                 <?php
-                    }
+                }
                 ?>
                 <div id="infection_sources">
                     <div class="full-widthdebug">
@@ -1383,7 +1384,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 </div>
                 <div class="full-chmod">
                     <?php 
-                        if($bChmod == 0 )
+                        if(!is_dir(ROOT_DIR."/admin"))
                         {
                     ?>
                             <div>
@@ -1406,7 +1407,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <div class="full-widthdebug">
                     <div class="mandatory"><font color="red">*</font> Indicates mandatory field</div>
                 </div>
-        </div>
+            </div>
 
                 <div class="go-button">
                     <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
