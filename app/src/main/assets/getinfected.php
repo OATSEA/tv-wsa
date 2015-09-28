@@ -2,6 +2,7 @@
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
     error_reporting(E_ALL ^ E_WARNING);
     error_reporting(0);
+    
     if(file_exists(getcwd().'/data/constants.php'))
     {
         require_once(getcwd().'/data/constants.php');
@@ -14,9 +15,17 @@
     }
     else
     {
-        $sSiteUrl = (isset($_SERVER["HTTP_HOST"]) ? "http://".$_SERVER["HTTP_HOST"] : '');
-        $sRequestUrl = $sSiteUrl.$_SERVER['REQUEST_URI'];
-        $protocol = $sRequestUrl;
+        if(file_exists(getcwd().'/ip.txt'))
+        {
+            $myfile = fopen(getcwd().'/ip.txt', "r") or die("Unable to open file!");
+            $protocol=fread($myfile,filesize(getcwd().'/ip.txt'));
+        }
+        else
+        {
+            $sSiteUrl = (isset($_SERVER["HTTP_HOST"]) ? "http://".$_SERVER["HTTP_HOST"] : '');
+            $sRequestUrl = $sSiteUrl.$_SERVER['REQUEST_URI'];
+            $protocol = $sRequestUrl;
+        }
         define("ROOT_DIR",getcwd());
         define('DEBUG_TEXT','0');
         define('INFECTED_RESOURCE','G');
@@ -1410,7 +1419,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0841</div>
+                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0455</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
