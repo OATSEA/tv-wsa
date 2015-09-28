@@ -178,10 +178,10 @@
                     text-align: center;
                 }
                 #loading-image {
-                   position: absolute;
-                   top: 100px;
-                   left: 240px;
-                   z-index: 100;
+                    position: absolute;
+                    top: 100px;
+                    left: 240px;
+                    z-index: 100;
                 }
                 .button
 		{
@@ -284,9 +284,7 @@
                     text-align: center;
                 }
                 #loading > h2 {
-                    font-size: 86%;
                     text-align: center;
-                    margin-top:25%;
                 }
         </style>
         <script type="text/javascript">
@@ -304,7 +302,7 @@
         </script>
     </head>
     <body class="main" onload="checkLoaded(false);">
-    <div id="loading"><?php echo is_dir(ROOT_DIR."/admin") ? "<h2>Updating....</h2>" : "<h2>Installing....</h2>";?></div>
+        <div id="loading"><img src="loading_spinner.gif"><?php echo is_dir(ROOT_DIR."/admin") ? "<h5>Updating....</h2>" : "<h2>Installing....</h2>";?></div>
     <script>
         checkLoaded(false);
     </script>
@@ -692,7 +690,7 @@
                 // move unzipped files to the same directory as the script (should be root)
                 // Warning/TEST! it probably won't move hidden files?
 
-                if($debug) { echo "<H2>Moving Files</h2>"; }
+                //if($debug) { echo "<H2>Moving Files</h2>"; }
 
                 // $startingloc = $temp_unzip_path.'/'.$subfolder;
                 $startingloc = $subfolder;
@@ -757,7 +755,7 @@
                                 ($bChmod) ? chmod($newFile, 0755) : '';
                                 //if($debug) { echo "<p>Moved $currentFile to $newFile</p>"; }
                             } else {
-                                if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
+                                //if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
                                 $result = false;
                             } // END rename 
                         }
@@ -776,16 +774,16 @@
                 // IF Tally2 is zero then move failed try alternative method based on scandir
 
                 if ($tally2==0) {
-                    if($debug) { echo "<h2>File Move Failed!</h2><p> - Attempting alternative approach</p>"; }
+                    //if($debug) { echo "<h2>File Move Failed!</h2><p> - Attempting alternative approach</p>"; }
 
                     $destination  = dirname(__FILE__);
 
-                    if($debug) { echo "<p>Moving files from<br>  $subfolder <br> to: $destination</p>"; }
+                    //if($debug) { echo "<p>Moving files from<br>  $subfolder <br> to: $destination</p>"; }
 
                     if (moveDIR($subfolder,$destination)) {
-                        if($debug) { echo "<h2>Move Succeeded!</h2>"; }
+                        //if($debug) { echo "<h2>Move Succeeded!</h2>"; }
                     } else {
-                        if($debug) { "<h2>ERROR! Move Failed!</h2><p>Infection Failed</p>"; }
+                        //if($debug) { "<h2>ERROR! Move Failed!</h2><p>Infection Failed</p>"; }
                     } // End moveDIR check
 
                 } // END try alternative move approach
@@ -990,12 +988,12 @@
                 // move unzipped files to the same directory as the script (should be root)
                 // Warning/TEST! it probably won't move hidden files?
 
-                if($debug) { echo "<H2>Moving Files</h2>"; }
+                //if($debug) { echo "<H2>Moving Files</h2>"; }
 
                 // $startingloc = $temp_unzip_path.'/'.$subfolder;
                 $startingloc = $subfolder;
 
-                if($debug) { echo "<p>Files being moved from: $startingloc </p>"; }
+                //if($debug) { echo "<p>Files being moved from: $startingloc </p>"; }
 
                 $tally2=0;
 
@@ -1055,7 +1053,7 @@
                                 ($bChmod) ? chmod($newFile, 0755) : '';
                                 //if($debug) { echo "<p>Moved $currentFile to $newFile</p>"; }
                             } else {
-                                if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
+                                //if($debug) { echo "<p>Failed to move $currentFile to $newFile</p>"; }
                                 $result = false;
                             } // END rename 
                         }
@@ -1074,16 +1072,16 @@
                 // IF Tally2 is zero then move failed try alternative method based on scandir
 
                 if ($tally2==0) {
-                    if($debug) { echo "<h2>File Move Failed!</h2><p> - Attempting alternative approach</p>"; }
+                    //if($debug) { echo "<h2>File Move Failed!</h2><p> - Attempting alternative approach</p>"; }
 
                     $destination  = dirname(__FILE__);
 
-                    if($debug) { echo "<p>Moving files from<br>  $subfolder <br> to: $destination</p>"; }
+                    //if($debug) { echo "<p>Moving files from<br>  $subfolder <br> to: $destination</p>"; }
 
                     if (moveDIR($subfolder,$destination)) {
-                        if($debug) { echo "<h2>Move Succeeded!</h2>"; }
+                        //if($debug) { echo "<h2>Move Succeeded!</h2>"; }
                     } else {
-                        if($debug) { "<h2>ERROR! Move Failed!</h2><p>Infection Failed</p>"; }
+                        //if($debug) { "<h2>ERROR! Move Failed!</h2><p>Infection Failed</p>"; }
                     } // End moveDIR check
 
                 } // END try alternative move approach
@@ -1408,12 +1406,14 @@ if($_SESSION['isValidation']['flag'] == 1)
                     <div class="mandatory"><font color="red">*</font> Indicates mandatory field</div>
                 </div>
             </div>
-
-                <div class="go-button">
-                    <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
-                </div><br/>    
-                </div>
-                <input type="hidden" name="setting_value" id="setting_value">
+            <div class="go-button">
+                <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
+            </div><br/>
+            <div class="full-widthdebug">
+                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0841</div>
+            </div>
+        </div>
+        <input type="hidden" name="setting_value" id="setting_value">
     </form>
 <?php
         }
