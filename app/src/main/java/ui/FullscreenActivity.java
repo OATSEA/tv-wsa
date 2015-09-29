@@ -96,7 +96,7 @@ public class FullscreenActivity extends Activity {
         showDialog();
 
         checkHtdocsOK();
-        if(!isGetInfectedExists()){
+        if(!isGetInfectedExists() || !isLoadingSpinnerExists()){
             copyAssets();
         }
 
@@ -200,6 +200,11 @@ public class FullscreenActivity extends Activity {
         return file.exists();
     }
 
+    private boolean isLoadingSpinnerExists(){
+        File file = new File(htdocs+File.separator+"loading_spinner.gif");
+        return file.exists();
+    }
+
     private void copyAssets() {
         AssetManager assetManager = getAssets();
         String[] files = null;
@@ -209,7 +214,7 @@ public class FullscreenActivity extends Activity {
             Log.e("tag", "Failed to get asset file list.", e);
         }
         if (files != null) for (String filename : files) {
-            if (filename.contains("getinfected.php")) {
+            if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
                 InputStream in = null;
                 OutputStream out = null;
                 try {
@@ -502,7 +507,7 @@ public class FullscreenActivity extends Activity {
         try {
             FileOutputStream f = new FileOutputStream(ipFile);
             PrintWriter pw = new PrintWriter(f);
-            pw.println(ipAddress);
+            pw.print(ipAddress);
             pw.flush();
             pw.close();
             f.close();
