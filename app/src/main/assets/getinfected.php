@@ -15,10 +15,11 @@
     }
     else
     {
-        if(file_exists(getcwd().'/ip.txt'))
+        if(file_exists(getcwd().'/IP.txt'))
         {
-            $myfile = fopen(getcwd().'/ip.txt', "r") or die("Unable to open file!");
-            $protocol=fread($myfile,filesize(getcwd().'/ip.txt'));
+            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+            $protocol = trim($protocol);
         }
         else
         {
@@ -1419,7 +1420,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0537</div>
+                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0556</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
