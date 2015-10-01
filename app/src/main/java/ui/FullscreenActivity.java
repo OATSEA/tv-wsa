@@ -6,8 +6,10 @@ import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.net.ConnectivityManager;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -101,7 +103,15 @@ public class FullscreenActivity extends Activity {
         }
 
 
-       writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
+
+        String ipAddress = Utils.getIPAddress(true);
+        if(ipAddress.trim().isEmpty()){
+            writeIpAddress("http://"+"localhost"+":8080");
+        }else{
+            writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
+        }
+
+
 
         if (preferences.getBoolean("enable_server_on_app_startup", false)) {
 
