@@ -7,11 +7,23 @@
     {
         require_once(getcwd().'/data/constants.php');
         $protocol = SITE_URL;
+        if(file_exists(getcwd().'/IP.txt'))
+        {
+            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+            $protocol = trim($protocol);
+        }
     }
     else if(file_exists(getcwd().'/data/bootstrap.php'))
     {
         require_once(getcwd().'/data/bootstrap.php');
         $protocol = SITE_URL;
+        if(file_exists(getcwd().'/IP.txt'))
+        {
+            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+            $protocol = trim($protocol);
+        }
     }
     else
     {
@@ -503,7 +515,7 @@
                     if (substr( $file ,0,1) != ".") {
                         $pathFile = $dir.'/'.$file;
                         if (is_dir($pathFile)) {
-                            if($debug) { echo "<p><b>Directory:</b> $pathFile</p>"; }
+                            //if($debug) { echo "<p><b>Directory:</b> $pathFile</p>"; }
 
                             $newDir = $dest."/".$file;
 
@@ -527,7 +539,7 @@
                                 //if($debug) { echo "<p>File $newFile already exists - Deleting</p>"; }
                                 unlink($newFile);
                             } else {
-                                if($debug) { echo "<p>File $newFile doesn't exist yet</p>"; }
+                                //if($debug) { echo "<p>File $newFile doesn't exist yet</p>"; }
                             }
 
                             // Move via rename
@@ -809,10 +821,24 @@
                 if(file_exists(getcwd().'/data/constants.php'))
                 {
                     require_once(getcwd().'/data/constants.php');
+                    if(file_exists(getcwd().'/IP.txt'))
+                    {
+                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                        $protocol = trim($protocol);
+                        define('SITE_URL',$protocol);
+                    }
                 }
                 else if(file_exists(getcwd().'/data/bootstrap.php'))
                 {
                     require_once(getcwd().'/data/bootstrap.php');
+                    if(file_exists(getcwd().'/IP.txt'))
+                    {
+                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                        $protocol = trim($protocol);
+                        define('SITE_URL',$protocol);
+                    }
                 }
                 echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
@@ -1107,10 +1133,24 @@
                 if(file_exists(getcwd().'/data/constants.php'))
                 {
                     require_once(getcwd().'/data/constants.php');
+                    if(file_exists(getcwd().'/IP.txt'))
+                    {
+                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                        $protocol = trim($protocol);
+                        define('SITE_URL',$protocol);
+                    }
                 }
                 else if(file_exists(getcwd().'/data/bootstrap.php'))
                 {
                     require_once(getcwd().'/data/bootstrap.php');
+                    if(file_exists(getcwd().'/IP.txt'))
+                    {
+                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                        $protocol = trim($protocol);
+                        define('SITE_URL',$protocol);
+                    }
                 }
                 echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
@@ -1142,11 +1182,25 @@ if($_SESSION['isValidation']['flag'] == 1)
             {
                 require_once(getcwd().'/data/constants.php');
                 $protocol = SITE_URL;
+                if(file_exists(getcwd().'/IP.txt'))
+                {
+                    $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                    $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                    $protocol = trim($protocol);
+                    define('SITE_URL',$protocol);
+                }
             }
             else if(file_exists(getcwd().'/data/bootstrap.php'))
             {
                 require_once(getcwd().'/data/bootstrap.php');
                 $protocol = SITE_URL;
+                if(file_exists(getcwd().'/IP.txt'))
+                {
+                    $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                    $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                    $protocol = trim($protocol);
+                    define('SITE_URL',$protocol);
+                }
             }
             else
             {
@@ -1154,6 +1208,12 @@ if($_SESSION['isValidation']['flag'] == 1)
                 $sRequestUrl = $sSiteUrl.$_SERVER['REQUEST_URI'];
                 //$protocol = isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
                 $protocol = $sRequestUrl;//"://" . $_SERVER['HTTP_HOST'];
+                if(file_exists(getcwd().'/IP.txt'))
+                {
+                    $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                    $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                    $protocol = trim($protocol);
+                }
             }
             redirect($protocol.'/admin');
         }
@@ -1420,7 +1480,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">V: 0.4 | B: master | TS: 20150929.1200</div>
+                <div class="mandatory">V: 0.4 | B: master | TS: 20150930.0307</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
