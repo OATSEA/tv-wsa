@@ -1480,7 +1480,10 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">V: 0.4 | B: master | TS: 20150930.0307</div>
+                <div class="mandatory">V: 0.4 | B: master | TS: 20151002.0100</div>
+            </div>
+            <div class="full-widthdebug">
+                <div class="mandatory">V: 0.4 | B: master | TS: TS: 20151002.0100</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
