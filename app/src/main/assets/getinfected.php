@@ -302,6 +302,7 @@
                     width: 100%;
                 }
                 .text h2{
+                    font-size: 16px;
                     width: 100%;
                     text-align: center;
                 }
@@ -324,7 +325,7 @@
         </script>
     </head>
     <body class="main" onload="checkLoaded(false);">
-        <div id="loading"><img src="loading_spinner.gif"><?php echo is_dir(ROOT_DIR."/admin") ? "<h5>Updating....</h2>" : "<h2>Installing....</h2>";?></div>
+        <div id="loading"><img src="loading_spinner.gif"><?php echo is_dir(ROOT_DIR."/admin") ? "<h2>Updating....</h2>" : "<h2>Installing....</h2>";?></div>
     <script>
         checkLoaded(false);
     </script>
@@ -826,7 +827,6 @@
                         $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                         $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                         $protocol = trim($protocol);
-                        define('SITE_URL',$protocol);
                     }
                 }
                 else if(file_exists(getcwd().'/data/bootstrap.php'))
@@ -837,10 +837,9 @@
                         $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                         $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                         $protocol = trim($protocol);
-                        define('SITE_URL',$protocol);
                     }
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
             }
             else 
@@ -1138,7 +1137,6 @@
                         $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                         $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                         $protocol = trim($protocol);
-                        define('SITE_URL',$protocol);
                     }
                 }
                 else if(file_exists(getcwd().'/data/bootstrap.php'))
@@ -1149,10 +1147,9 @@
                         $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                         $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                         $protocol = trim($protocol);
-                        define('SITE_URL',$protocol);
                     }
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
             } // END Download if zipfile doesn't already exists
         }
@@ -1187,7 +1184,6 @@ if($_SESSION['isValidation']['flag'] == 1)
                     $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                     $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                     $protocol = trim($protocol);
-                    define('SITE_URL',$protocol);
                 }
             }
             else if(file_exists(getcwd().'/data/bootstrap.php'))
@@ -1199,7 +1195,6 @@ if($_SESSION['isValidation']['flag'] == 1)
                     $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
                     $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
                     $protocol = trim($protocol);
-                    define('SITE_URL',$protocol);
                 }
             }
             else
@@ -1480,10 +1475,10 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151006.0252</div>
+                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151007.0919</div>
             </div>
             <div class="full-widthdebug">
-                <div class="mandatory">Teacher Virus - V: 0.4 | B: master | TS: 20151006.0252</div>
+                <div class="mandatory">Teacher Virus - V: 0.4 | B: master | TS: 20151006.0300</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
