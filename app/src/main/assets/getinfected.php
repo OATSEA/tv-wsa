@@ -1478,7 +1478,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151007.0919</div>
             </div>
             <div class="full-widthdebug">
-                <div class="mandatory">Teacher Virus - V: 0.4 | B: master | TS: 20151006.0300</div>
+                <div class="mandatory">Teacher Virus - V: 0.4 | B: master | TS: 20151006.1207</div>
             </div>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
