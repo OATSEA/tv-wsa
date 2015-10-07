@@ -1475,11 +1475,21 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151007.0919</div>
+                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151007.0234</div>
             </div>
-            <div class="full-widthdebug">
-                <div class="mandatory">Teacher Virus - V: 0.4 | B: master | TS: 20151006.1207</div>
-            </div>
+            <?php
+                if(file_exists(ROOT_DIR."/version.txt"))
+                {
+                    $myfile = fopen(ROOT_DIR."/version.txt", "r") or die("Unable to open file!");
+                    $sVersion = fread($myfile,filesize(getcwd().'/IP.txt'));
+                    $sVersion = trim($sVersion);
+            ?>
+                    <div class="full-widthdebug">
+                        <div class="mandatory"><?php echo $sVersion; ?></div>
+                    </div>
+            <?php
+                }
+            ?>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
     </form>
