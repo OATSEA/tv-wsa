@@ -2,21 +2,16 @@
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
     error_reporting(E_ALL ^ E_WARNING);
     error_reporting(0);
-    if(file_exists(getcwd().'/data/bootstrap.php'))
+    if(file_exists(getcwd().'/data/constants.php'))
     {
-        require_once(getcwd().'/data/bootstrap.php');
-        if(file_exists(getcwd().'/data/constants.php'))
-        {
-            require_once(getcwd().'/data/constants.php');
-            $protocol = SITE_URL;
-            if(file_exists(getcwd().'/IP.txt'))
-            {
-                $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-                $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-                $protocol = trim($protocol);
-            }
-        }
+        require_once(getcwd().'/data/constants.php');
         $protocol = SITE_URL;
+        if(file_exists(getcwd().'/IP.txt'))
+        {
+            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+            $protocol = trim($protocol);
+        }
         if(file_exists(getcwd().'/IP.txt'))
         {
             $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
@@ -1455,7 +1450,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151008.0830</div>
+                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151008.0949</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/version.txt"))
