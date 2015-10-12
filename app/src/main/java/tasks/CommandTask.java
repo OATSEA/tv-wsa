@@ -2,6 +2,7 @@ package tasks;
 
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 
 import org.teachervirus.AppController;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import eu.chainfire.libsuperuser.Shell;
 
-public class CommandTask extends ProgressDialogTask<String, String, String> {
+public class CommandTask extends AsyncTask<String, String, String> {
 
     public final static String CHANGE_PERMISSION = "/system/bin/chmod 755 ";
     public final static String COMMAND_EXECUTED = "command_executed";
@@ -25,6 +26,8 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
     private int command_executed;
     private OnCommandTaskExecutedListener onCommandTaskExecutedListener;
 
+    private Context mContext;
+
     public interface OnCommandTaskExecutedListener{
         public void onTaskCompleted();
     }
@@ -33,26 +36,30 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
 
     }
 
-    public CommandTask(Context context) {
-        super(context);
+    public CommandTask(Context mContext) {
+        this.mContext = mContext;
     }
 
-    public CommandTask(Context context, String title, String message) {
-        super(context, title, message);
-    }
-    
-    public CommandTask(Context context, String title, String message, boolean createDialog) {
-        super(context, title, message, createDialog);
-    }
+    /* public CommandTask(Context context) {
+            super(context);
+        }
 
-    public CommandTask(Context context, int titleResId, int messageResId) {
-        super(context, context.getString(titleResId), context.getString(messageResId));
-    }
-    
-    public CommandTask(Context context, int titleResId, int messageResId, boolean createDialog) {
-        super(context, context.getString(titleResId), context.getString(messageResId), createDialog);
-    }
+        public CommandTask(Context context, String title, String message) {
+            super(context, title, message);
+        }
 
+        public CommandTask(Context context, String title, String message, boolean createDialog) {
+            super(context, title, message, createDialog);
+        }
+
+        public CommandTask(Context context, int titleResId, int messageResId) {
+            super(context, context.getString(titleResId), context.getString(messageResId));
+        }
+
+        public CommandTask(Context context, int titleResId, int messageResId, boolean createDialog) {
+            super(context, context.getString(titleResId), context.getString(messageResId), createDialog);
+        }
+    */
     public static CommandTask createForConnect(final Context c, final String execName, final String bindPort) {
     	return createForConnect(c, execName, bindPort, true);
     }
@@ -63,7 +70,7 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
                 add(String.format("%s/scripts/server-sh.sh %s %s", Constants.INTERNAL_LOCATION, execName, bindPort));
             }
         });
-        CommandTask task = new CommandTask(c, R.string.server_loading, R.string.turning_on_server, createDialog);
+        CommandTask task = new CommandTask(c);
         task.addCommand(command);
         task.setNotification(R.string.web_server_is_running);
         return task;
@@ -75,7 +82,7 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
                 add(Constants.INTERNAL_LOCATION + "/scripts/shutdown-sh.sh");
             }
         });
-        CommandTask task = new CommandTask(c, R.string.server_loading, R.string.turning_off_server);
+        CommandTask task = new CommandTask(c);
         task.addCommand(command);
         return task;
     }
@@ -86,7 +93,7 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
                 add(String.format("rm -R %s", Constants.INTERNAL_LOCATION.concat("/")));
             }
         });
-        CommandTask task = new CommandTask(c, R.string.uninstalling_core_apps, R.string.core_uninstalling);
+        CommandTask task = new CommandTask(c);
         task.addCommand(command);
         task.setNotification(R.string.core_apps_uninstalled);
         return task;
@@ -112,7 +119,7 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        dismissProgress();
+        //dismissProgress();
         if(onCommandTaskExecutedListener!=null){
             onCommandTaskExecutedListener.onTaskCompleted();
         }
@@ -121,10 +128,10 @@ public class CommandTask extends ProgressDialogTask<String, String, String> {
     @Override
     protected void onProgressUpdate(String... queryRes) {
         super.onProgressUpdate(queryRes);
-        setMessage(queryRes[0]);
+       // setMessage(queryRes[0]);
         if (queryRes[0].equals(COMMAND_EXECUTED)) {
             command_executed = (command_executed == 0) ? R.string.command_executed : command_executed;
-            AppController.toast(getContext(), getContext().getString(command_executed));
+            AppController.toast(mContext, mContext.getString(command_executed));
         }
     }
 

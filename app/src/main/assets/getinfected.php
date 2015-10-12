@@ -2,22 +2,16 @@
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
     error_reporting(E_ALL ^ E_WARNING);
     error_reporting(0);
+    
     if(file_exists(getcwd().'/data/constants.php'))
     {
         require_once(getcwd().'/data/constants.php');
         $protocol = SITE_URL;
-        if(file_exists(getcwd().'/IP.txt'))
-        {
-            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-            $protocol = trim($protocol);
-        }
-        if(file_exists(getcwd().'/IP.txt'))
-        {
-            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-            $protocol = trim($protocol);
-        }
+    }
+    else if(file_exists(getcwd().'/data/bootstrap.php'))
+    {
+        require_once(getcwd().'/data/bootstrap.php');
+        $protocol = SITE_URL;
     }
     else
     {
@@ -300,7 +294,6 @@
                     text-align: center;
                 }
                 #loading > h2 {
-                    font-size: 55px;
                     text-align: center;
                 }
         </style>
@@ -319,17 +312,7 @@
         </script>
     </head>
     <body class="main" onload="checkLoaded(false);">
-        <div id="loading">
-            <?php
-                $sLoadingImg = ((file_exists(getcwd().'/loading_spinner.gif')) ? $protocol.'/loading_spinner.gif' : ((file_exists(ROOT_DIR.'/images/loading_spinner.gif')) ? $protocol.'/images/loading_spinner.gif' : ''));
-                if(!empty($sLoadingImg))
-                {
-            ?>
-                <img src="<?php echo $sLoadingImg; ?>">
-            <?php
-                } 
-                echo is_dir(ROOT_DIR."/admin") ? "<h2>Updating....</h2>" : "<h2>Installing....</h2>";?>
-        </div>
+        <div id="loading"><img src="loading_spinner.gif"><?php echo is_dir(ROOT_DIR."/admin") ? "<h5>Updating....</h2>" : "<h2>Installing....</h2>";?></div>
     <script>
         checkLoaded(false);
     </script>
@@ -520,7 +503,7 @@
                     if (substr( $file ,0,1) != ".") {
                         $pathFile = $dir.'/'.$file;
                         if (is_dir($pathFile)) {
-                            //if($debug) { echo "<p><b>Directory:</b> $pathFile</p>"; }
+                            if($debug) { echo "<p><b>Directory:</b> $pathFile</p>"; }
 
                             $newDir = $dest."/".$file;
 
@@ -544,7 +527,7 @@
                                 //if($debug) { echo "<p>File $newFile already exists - Deleting</p>"; }
                                 unlink($newFile);
                             } else {
-                                //if($debug) { echo "<p>File $newFile doesn't exist yet</p>"; }
+                                if($debug) { echo "<p>File $newFile doesn't exist yet</p>"; }
                             }
 
                             // Move via rename
@@ -601,7 +584,7 @@
                 // Check if ip param is set to either an IP address or a url (i.e. without http:// infront)    
                 // $ip="10.1.1.38" or "test.teachervirus.org"
 
-                if(isset($sDeviceAddress) && (!empty($sDeviceAddress)) && $sInfectionResource == "I") {
+                if(isset($sDeviceAddress) && (!empty($sDeviceAddress))) {
                     $ip= $sDeviceAddress;
                     if($debug) {echo "<p>Address has been provided as: $ip</p>"; }
                 } else {
@@ -823,29 +806,26 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/data/bootstrap.php'))
+                if(file_exists(getcwd().'/data/constants.php'))
                 {
-                    require(getcwd().'/data/bootstrap.php');
-                    $protocol = SITE_URL;
-                    if(file_exists(getcwd().'/IP.txt'))
-                    {
-                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-                        $protocol = trim($protocol);
-                    }
+                    require_once(getcwd().'/data/constants.php');
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                else if(file_exists(getcwd().'/data/bootstrap.php'))
+                {
+                    require_once(getcwd().'/data/bootstrap.php');
+                }
+                echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
             }
             else 
             {
-                if ($ip=="no" && $sInfectionResource == "G")
+                if ($ip=="no")
                 {
                     // Download from github zipball/master as no IP address set
                     $geturl = (!empty($sBranchName) && isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "https://github.com/$username/$repo/zipball/$sBranchName/" : "https://github.com/$username/$repo/zipball/master/";
                     $sGetInfectedGetUrl = "https://github.com/$username/getinfected/zipball/master/";
                 }
-                elseif($sInfectionResource == "I")
+                else
                 {
                     // as IP address has been set attempt download from IP address
                    $geturl = empty($nPort) ? "http://$ip/$zipfile" : "http://$ip:$nPort/$zipfile";
@@ -1124,18 +1104,15 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/data/bootstrap.php'))
+                if(file_exists(getcwd().'/data/constants.php'))
                 {
-                    require(getcwd().'/data/bootstrap.php');
-                    $protocol = SITE_URL;
-                    if(file_exists(getcwd().'/IP.txt'))
-                    {
-                        $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-                        $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-                        $protocol = trim($protocol);
-                    }
+                    require_once(getcwd().'/data/constants.php');
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                else if(file_exists(getcwd().'/data/bootstrap.php'))
+                {
+                    require_once(getcwd().'/data/bootstrap.php');
+                }
+                echo '<h2>Infection Complete!</h2><h2><a href="'.SITE_URL.'/admin"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
             } // END Download if zipfile doesn't already exists
         }
@@ -1161,16 +1138,15 @@ if($_SESSION['isValidation']['flag'] == 1)
         $_SESSION['isLoggedIn'] = isset($_SESSION['isLoggedIn']) ? $_SESSION['isLoggedIn'] : FALSE;
         if((is_dir("admin") && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])) || (isset($_GET['isValidUser']) && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])))
         {
-            if(file_exists(getcwd().'/data/bootstrap.php'))
+            if(file_exists(getcwd().'/data/constants.php'))
             {
-                require(getcwd().'/data/bootstrap.php');
+                require_once(getcwd().'/data/constants.php');
                 $protocol = SITE_URL;
-                if(file_exists(getcwd().'/IP.txt'))
-                {
-                    $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-                    $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-                    $protocol = trim($protocol);
-                }
+            }
+            else if(file_exists(getcwd().'/data/bootstrap.php'))
+            {
+                require_once(getcwd().'/data/bootstrap.php');
+                $protocol = SITE_URL;
             }
             else
             {
@@ -1178,12 +1154,6 @@ if($_SESSION['isValidation']['flag'] == 1)
                 $sRequestUrl = $sSiteUrl.$_SERVER['REQUEST_URI'];
                 //$protocol = isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
                 $protocol = $sRequestUrl;//"://" . $_SERVER['HTTP_HOST'];
-                if(file_exists(getcwd().'/IP.txt'))
-                {
-                    $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-                    $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-                    $protocol = trim($protocol);
-                }
             }
             redirect($protocol.'/admin');
         }
@@ -1450,21 +1420,8 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | TS: 20151009.0425</div>
+                <div class="mandatory">V: 0.4 | B: master | TS: 20150928.0556</div>
             </div>
-            <?php
-                if(file_exists(ROOT_DIR."/version.txt"))
-                {
-                    $myfile = fopen(ROOT_DIR."/version.txt", "r") or die("Unable to open file!");
-                    $sVersion = fread($myfile,filesize(ROOT_DIR."/version.txt"));
-                    $sVersion = trim($sVersion);
-            ?>
-                    <div class="full-widthdebug">
-                        <div class="mandatory"><?php echo $sVersion; ?></div>
-                    </div>
-            <?php
-                }
-            ?>
         </div>
         <input type="hidden" name="setting_value" id="setting_value">
     </form>

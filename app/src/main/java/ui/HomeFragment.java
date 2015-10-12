@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +96,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().finish();
+
     }
 
     protected void prepareView(View view) {
@@ -109,6 +110,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.ll_about).setOnClickListener(this);
         view.findViewById(R.id.ll_uninstall).setOnClickListener(this);
         view.findViewById(R.id.ll_teacher_virus).setOnClickListener(this);
+        view.findViewById(R.id.ll_exit).setOnClickListener(this);
     }
 
     @Override
@@ -121,6 +123,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             getActivity().startActivity(fullScreenIntent);
+        }else if(view.getId()== R.id.ll_exit){
+            Intent intent = new Intent("stop");
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            getActivity().finish();
+
         }else
             sInflateCallback.setOnViewIdReceived(view.getId());
     }
