@@ -67,6 +67,7 @@ public class ServerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mConnectionReceiver);
         destroyService();
     }
 

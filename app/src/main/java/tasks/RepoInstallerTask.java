@@ -2,16 +2,18 @@ package tasks;
 
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class RepoInstallerTask extends ProgressDialogTask<String, String, Boolean> {
+public class RepoInstallerTask extends AsyncTask<String, String, Boolean> {
 
     public static final String INSTALL_DONE = "org.opendroidphp.repository.INSTALLED";
     public static final String INSTALL_ERROR = "org.opendroidphp.repository.INSTALL_ERROR";
@@ -19,18 +21,33 @@ public class RepoInstallerTask extends ProgressDialogTask<String, String, Boolea
     private String repositoryName;
     private String repositoryPath;
     private  OnRepoInstalledListener  onRepoInstalledListener;
+    private Context context;
 
     public interface OnRepoInstalledListener{
         public void repoInstalled();
     }
 
 
+    public RepoInstallerTask() {
+    }
+
     public RepoInstallerTask(Context context) {
+        this.context = context;
+    }
+
+    /* public RepoInstallerTask(Context context) {
         super(context);
     }
 
     public RepoInstallerTask(Context context, String title, String message) {
         super(context, title, message);
+    }
+*/
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+
     }
 
     @Override
@@ -43,7 +60,7 @@ public class RepoInstallerTask extends ProgressDialogTask<String, String, Boolea
         createDirectory("");
         try {
             if (repositoryName == null || repositoryName.equals("")) {
-                zipInputStream = new ZipInputStream(getContext().getAssets().open("data.zip"));
+                zipInputStream = new ZipInputStream(context.getAssets().open("data.zip"));
             } else if (new File(repositoryName).exists()) {
                 zipInputStream = new ZipInputStream(new FileInputStream(repositoryName));
             }
@@ -74,7 +91,7 @@ public class RepoInstallerTask extends ProgressDialogTask<String, String, Boolea
             e.printStackTrace();
         }
         publishProgress(isSuccess ? INSTALL_DONE : INSTALL_ERROR);
-        dismissProgress();
+
         return isSuccess;
     }
 
@@ -94,7 +111,7 @@ public class RepoInstallerTask extends ProgressDialogTask<String, String, Boolea
 
     @Override
     protected void onProgressUpdate(String... values) {
-        setMessage(values[0]);
+        //setMessage(values[0]);
 
 
         if(values[0].equals(INSTALL_DONE) ){

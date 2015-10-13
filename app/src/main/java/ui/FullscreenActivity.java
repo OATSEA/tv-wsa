@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -81,6 +83,7 @@ public class FullscreenActivity extends Activity {
     private static String file_url = "https://www.github.com/OATSEA/getinfected/zipball/master";  // File url to download - github
     private static String getinfected_url = "http://localhost:8080/getinfected.php"; // getinfected installer
 
+    private static String play_url = "http://localhost:8080/play";
 
     private static String htdocs = Environment.getExternalStorageDirectory() + File.separator + "htdocs";
     private static String up = htdocs + File.separator + "play" + File.separator + "up.html";
@@ -89,18 +92,26 @@ public class FullscreenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_fullscreen);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("stop"));
+
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(this);
 
         countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
         countDownTimer.start();
-        showDialog();
 
         checkHtdocsOK();
-        if(!isGetInfectedExists() || !isLoadingSpinnerExists()){
-            copyAssets();
-        }
+
+
+            if(!isGetInfectedExists() || !isLoadingSpinnerExists()){
+                copyAssets();
+            }
+
+
+
 
 
 
@@ -198,12 +209,40 @@ public class FullscreenActivity extends Activity {
     } // END onCreate
 
 
+    private boolean isInstalled(){
+        boolean playExists = false,tempExists = false;
+        File parentDir = new File(htdocs);
+        File[] allFiles = parentDir.listFiles();
+
+        for(File file : allFiles){
+
+            if(file.isDirectory()){
+                if(file.getName().equals("Play")){
+                    playExists = true;
+                }
+                if(file.getName().startsWith("unzip_temp")){
+                   tempExists = true;
+                }
+            }
+        }
+
+        if(playExists && !tempExists){
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         dismissDialog();
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+        super.onDestroy();
+    }
 
     private boolean isGetInfectedExists(){
         File file = new File(htdocs+File.separator+"getinfected.php");
@@ -368,7 +407,13 @@ public class FullscreenActivity extends Activity {
                             @Override
                             public void run() {
                                 dismissDialog();
-                                openPage(getinfected_url);
+
+                                if(isInstalled()){
+                                    openPage(play_url);
+                                }else{
+                                    openPage(getinfected_url);
+                                }
+
 
                             }
                         });
@@ -390,6 +435,11 @@ public class FullscreenActivity extends Activity {
                             @Override
                             public void run() {
 
+                                if(isInstalled()){
+                                    openPage(play_url);
+                                }else{
+                                    openPage(getinfected_url);
+                                }
                                 openPage(getinfected_url);
                                 Toast.makeText(FullscreenActivity.this,"Get Infected Loaded",Toast.LENGTH_LONG).show();
                             }
@@ -433,6 +483,13 @@ public class FullscreenActivity extends Activity {
 
 
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDialog();
+        }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
@@ -529,6 +586,16 @@ public class FullscreenActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            disableServer();
+            finish();
+        }
+    };
 
 } // END CLASS FullScreenActivity
 

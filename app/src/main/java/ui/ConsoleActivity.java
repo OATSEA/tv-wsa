@@ -86,6 +86,13 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
         }
     }
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
     protected void inflateFragment(int fragmentId) {
         inflateFragment(getFragmentById(fragmentId));
     }
