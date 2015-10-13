@@ -295,12 +295,12 @@
                     min-height: 5px;
                     width: 100%;
                 }
-                .text h2{
-                    width: 100%;
+                #loading > h2 {
+                    font-size: 52px;
                     text-align: center;
                 }
-                #loading > h2 {
-                    font-size: 55px;
+                .text h2{
+                    width: 100%;
                     text-align: center;
                 }
         </style>
@@ -1450,7 +1450,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | TS: 20151009.0425</div>
+                <div class="mandatory">Getinfected - V: 0.4 | TS: 20151013.1205</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/version.txt"))
