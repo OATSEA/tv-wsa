@@ -104,6 +104,48 @@
             </LinearLayout>
 
 
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20.0dip"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/ll_exit"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/table_whole_bg_all"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="50.0dip"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="8.0dip"
+                            android:src="@drawable/ic_close" />
+
+                        <TextView
+                            android:id="@+id/tv_exit"
+                            android:layout_height="wrap_content"
+                            android:layout_width="fill_parent"
+                            android:layout_marginLeft="6.0dip"
+                            android:padding="10.0dip"
+                            android:text="Stop Webserver" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingRight="15.0dip"
+                            android:src="@drawable/next_grey" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
 
 
             <LinearLayout
@@ -322,47 +364,6 @@
 
 
 
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20.0dip"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:id="@+id/ll_exit"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/table_whole_bg_all"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="50.0dip"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8.0dip"
-                            android:src="@drawable/ic_cloud" />
-
-                        <TextView
-                            android:id="@+id/tv_exit"
-                            android:layout_height="wrap_content"
-                            android:layout_width="fill_parent"
-                            android:layout_marginLeft="6.0dip"
-                            android:padding="10.0dip"
-                            android:text="Exit" />
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingRight="15.0dip"
-                            android:src="@drawable/next_grey" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
 
 
             <LinearLayout
