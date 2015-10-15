@@ -28,6 +28,8 @@ import android.widget.Toast;
 
 import org.teachervirus.Constants;
 import org.teachervirus.R;
+import org.xwalk.core.XWalkPreferences;
+import org.xwalk.core.XWalkView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -67,7 +69,8 @@ import utils.Utils;
 
 public class FullscreenActivity extends Activity {
 
-    private WebView myWebView;
+
+    private XWalkView xWalkWebView;
     private static final String TAG = FullscreenActivity.class.getSimpleName();
 
     // Progress Dialog
@@ -151,18 +154,7 @@ public class FullscreenActivity extends Activity {
             new ConnectionListenerTask().execute();
         }
 
-        myWebView = (WebView) findViewById(R.id.webview);
-        WebSettings webSettings = myWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-
-        myWebView.setWebViewClient(new WebViewClient() {
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Log.i("WEB_VIEW_TEST", "error code:" + errorCode);
-                super.onReceivedError(view, errorCode, description, failingUrl);
-            }
-        });
+        xWalkWebView=(XWalkView)findViewById(R.id.xwalkWebView);
 
         // Hide Everything but Web Page:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -235,11 +227,19 @@ public class FullscreenActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        if (xWalkWebView != null) {
+            xWalkWebView.pauseTimers();
+            xWalkWebView.onHide();
+        }
         dismissDialog();
     }
 
     @Override
     protected void onDestroy() {
+        if (xWalkWebView != null) {
+            xWalkWebView.onDestroy();
+        }
+
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
@@ -303,7 +303,10 @@ public class FullscreenActivity extends Activity {
 
 
     private void openPage(String url) {
-        myWebView.loadUrl(url);
+        xWalkWebView.load(url, null);
+
+        // turn on debugging
+        XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
     }
 
 
@@ -320,7 +323,10 @@ public class FullscreenActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-
+        if (xWalkWebView != null) {
+            xWalkWebView.resumeTimers();
+            xWalkWebView.onShow();
+        }
         // Hide Everything:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             View rootView = getWindow().getDecorView();
@@ -376,13 +382,7 @@ public class FullscreenActivity extends Activity {
     @Override
     public void onBackPressed() {
 
-        if (myWebView.canGoBack()) {
-            myWebView.goBack();
-        } else {
-
-            super.onBackPressed();
-
-        }
+      super.onBackPressed();
     } // END onBackPressed
 
 
