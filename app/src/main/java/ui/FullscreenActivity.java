@@ -153,6 +153,7 @@ public class FullscreenActivity extends Activity {
         }else{
             new ConnectionListenerTask().execute();
         }
+        Toast.makeText(FullscreenActivity.this,"Running Cross walk",Toast.LENGTH_SHORT).show();
 
         xWalkWebView=(XWalkView)findViewById(R.id.xwalkWebView);
 
