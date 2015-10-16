@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -29,6 +30,8 @@ import android.widget.Toast;
 import org.teachervirus.Constants;
 import org.teachervirus.R;
 import org.xwalk.core.XWalkPreferences;
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkUIClient;
 import org.xwalk.core.XWalkView;
 
 import java.io.File;
@@ -90,6 +93,43 @@ public class FullscreenActivity extends Activity {
 
     private static String htdocs = Environment.getExternalStorageDirectory() + File.separator + "htdocs";
     private static String up = htdocs + File.separator + "play" + File.separator + "up.html";
+
+
+
+    class MyResourceClient extends XWalkResourceClient {
+        MyResourceClient(XWalkView view) {
+            super(view);
+        }
+
+        @Override
+        public void onLoadStarted(XWalkView view, String url) {
+
+            super.onLoadStarted(view, url);
+        }
+
+        @Override
+        public void onLoadFinished(XWalkView view, String url) {
+            super.onLoadFinished(view, url);
+        }
+    }
+
+    class MyUIClient extends XWalkUIClient {
+        MyUIClient(XWalkView view) {
+            super(view);
+        }
+
+        @Override
+        public void onFullscreenToggled(XWalkView view, boolean enterFullscreen) {
+            super.onFullscreenToggled(view, enterFullscreen);
+        }
+
+
+        @Override
+        public void onPageLoadStarted(XWalkView view, String url) {
+
+            super.onPageLoadStarted(view, url);
+        }
+    }
 
 
     @Override
@@ -156,6 +196,8 @@ public class FullscreenActivity extends Activity {
         Toast.makeText(FullscreenActivity.this,"Running Cross walk",Toast.LENGTH_SHORT).show();
 
         xWalkWebView=(XWalkView)findViewById(R.id.xwalkWebView);
+        xWalkWebView.setResourceClient(new MyResourceClient(xWalkWebView));
+        xWalkWebView.setUIClient(new MyUIClient(xWalkWebView));
 
         // Hide Everything but Web Page:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -210,7 +252,7 @@ public class FullscreenActivity extends Activity {
         for(File file : allFiles){
 
             if(file.isDirectory()){
-                if(file.getName().equals("Play")){
+                if(file.getName().equalsIgnoreCase("Play")){
                     playExists = true;
                 }
                 if(file.getName().startsWith("unzip_temp")){
@@ -411,8 +453,10 @@ public class FullscreenActivity extends Activity {
 
                                 if(isInstalled()){
                                     openPage(play_url);
+                                    Toast.makeText(FullscreenActivity.this,"installation found",Toast.LENGTH_SHORT).show();
                                 }else{
                                     openPage(getinfected_url);
+                                    Toast.makeText(FullscreenActivity.this,"installation not found",Toast.LENGTH_SHORT).show();
                                 }
 
 
@@ -438,11 +482,12 @@ public class FullscreenActivity extends Activity {
 
                                 if(isInstalled()){
                                     openPage(play_url);
+                                    Toast.makeText(FullscreenActivity.this,"installation found",Toast.LENGTH_SHORT).show();
                                 }else{
                                     openPage(getinfected_url);
+                                    Toast.makeText(FullscreenActivity.this,"installation not found",Toast.LENGTH_SHORT).show();
                                 }
-                                openPage(getinfected_url);
-                                Toast.makeText(FullscreenActivity.this,"Get Infected Loaded",Toast.LENGTH_LONG).show();
+
                             }
                         });
                     }else{

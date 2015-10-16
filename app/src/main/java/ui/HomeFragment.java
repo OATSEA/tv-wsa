@@ -124,6 +124,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             getActivity().startActivity(fullScreenIntent);
         }else if(view.getId()== R.id.ll_exit){
+            disableServer();
             Intent intent = new Intent("stop");
             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
             getActivity().finish();

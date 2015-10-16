@@ -66,9 +66,10 @@ public class ServerService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         unregisterReceiver(mConnectionReceiver);
         destroyService();
+        super.onDestroy();
+
     }
 
     @Override
@@ -81,16 +82,16 @@ public class ServerService extends Service {
         Context context = getApplicationContext();
         NotificationManager noti = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+                new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("DroidPHP service started")
                         .setContentText("Web Service started");
 
-        Intent notificationIntent = new Intent(this, ConsoleActivity.class);
+        Intent notificationIntent = new Intent(context, ConsoleActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
-                getApplicationContext(), 0, notificationIntent,0);
+                getApplicationContext(), 143, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentIntent(contentIntent);
         startForeground(143, mBuilder.build());
