@@ -202,10 +202,18 @@ public class FullscreenActivity extends Activity {
         // Hide Everything but Web Page:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
             // Hide the bottom bar and prevent it from reactivating
             // Requires minimym of 11
             // Source: http://stackoverflow.com/questions/11027193/maintaining-lights-out-mode-view-setsystemuivisibility-across-restarts
-            final View rootView = getWindow().getDecorView();
+           /* final View rootView = getWindow().getDecorView();
             // rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
 
             // New Immersive config: https://developer.android.com/training/system-ui/immersive.htm
@@ -217,14 +225,24 @@ public class FullscreenActivity extends Activity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
+
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+
             rootView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
                 @Override
                 public void onSystemUiVisibilityChange(int visibility) {
                     if (visibility == View.SYSTEM_UI_FLAG_VISIBLE) {
-                        /* rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                        *//**//* rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                         rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
                         rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-                        */
+                        *//**//*
                         // New Immersive config: https://developer.android.com/training/system-ui/immersive.html
 
                         rootView.setSystemUiVisibility(
@@ -237,8 +255,8 @@ public class FullscreenActivity extends Activity {
 
                     }
                 }
-            });
-        } // END Hide Everything
+            });*/
+        } // END Hide Everything*/
 
 
     } // END onCreate
@@ -265,6 +283,22 @@ public class FullscreenActivity extends Activity {
             return true;
         }
         return false;
+    }
+
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if(hasFocus){
+
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+        super.onWindowFocusChanged(hasFocus);
     }
 
     @Override

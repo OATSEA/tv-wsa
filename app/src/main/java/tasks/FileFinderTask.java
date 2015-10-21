@@ -43,7 +43,7 @@ public class FileFinderTask extends ProgressDialogTask<Void, HashMap<Integer, Fi
 
     public static FileFinderTask createFor(final Context c, final FileEvent event) {
         FileFinderTask task = new FileFinderTask(c, R.string.finder_title, R.string.finder_message);
-        task.addFile(new File(Constants.PROJECT_LOCATION + "/hosts"));
+        task.addFile(new File(Constants.PROJECT_LOCATION + "/conf"));
         task.addExtensions(new String[]{"conf"});
         task.addEvent(event);
         return task;
