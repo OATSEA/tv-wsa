@@ -2,16 +2,24 @@ package ui;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +27,18 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 
+
+
 import org.teachervirus.Constants;
 import org.teachervirus.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import common.utils.FileUtils;
@@ -39,6 +56,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Switch sEnableServer;
     private SharedPreferences preferences;
     private Context context;
+    private static final String TAG = HomeFragment.class.getSimpleName();
+
+    private static String pathToConfig = Environment.getExternalStorageDirectory()
+            +File.separator+"droidphp"+File.separator+"conf"+File.separator+"lighttpd.conf";
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,6 +84,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("path"));
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(getActivity());
         new AsyncSystemRequirement().execute();
@@ -99,6 +123,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+        super.onDestroy();
+    }
+
     protected void prepareView(View view) {
         sEnableServer = (Switch) view.findViewById(R.id.sw_enable_server);
         sEnableServer.setEnabled(true);
@@ -111,6 +141,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.ll_uninstall).setOnClickListener(this);
         view.findViewById(R.id.ll_teacher_virus).setOnClickListener(this);
         view.findViewById(R.id.ll_exit).setOnClickListener(this);
+        view.findViewById(R.id.ll_dir).setOnClickListener(this);
     }
 
     @Override
@@ -137,6 +168,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         DialogFragment fragment = DialogHelpers.factoryForInstall(context);
         fragment.show(getFragmentManager(), getClass().getSimpleName());
     }
+
+
+    private String getPathToRootDir(){
+        try {
+            List<String>  lines= org.apache.commons.io.FileUtils.readLines(new File(pathToConfig),"UTF-8");
+            for(String line : lines){
+
+                if(line.startsWith("server.document-root")){
+                    Log.e(TAG, line);
+                    int startIndex = line.indexOf("\"");
+                    String path = line.substring(startIndex + 1, line.length() - 1);
+                    return path;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
 
     private class AsyncSystemRequirement extends AsyncTask<Void, Void, Void> {
         @Override
@@ -231,5 +284,179 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 getSystemService(Context.NOTIFICATION_SERVICE);
         notify.cancel(143);
         context.stopService(new Intent(getActivity(), ServerService.class));
+    }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String newPath = intent.getStringExtra("path");
+            if(!newPath.equalsIgnoreCase(getPathToRootDir())){
+
+                askToCopy(newPath);
+            }
+
+        }
+    };
+
+    private void askToCopy(final String newPath){
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(getActivity());
+        builder.setTitle("Copy Data");
+        builder.setMessage("Would you like to copy all data to new directory.");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                File mOldDir = new File(getPathToRootDir());
+                if(mOldDir.isDirectory()) {
+                    File[] mFiles = mOldDir.listFiles();
+                    for (File file : mFiles) {
+                        try {
+                            InputStream in = new FileInputStream(file);
+                            File outFile = new File(new File(newPath), file.getName());
+                            OutputStream out = new FileOutputStream(outFile);
+                            copyFile(in, out);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                    setNewPath(newPath);
+                    askToRestart();
+                }
+
+
+
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+               File mOldDir = new File(getPathToRootDir());
+                if(mOldDir.isDirectory()){
+                    File[] mFiles = mOldDir.listFiles();
+                    for(File file:mFiles){
+
+                        String filename = file.getName();
+                        if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
+                            try {
+                                InputStream in = new FileInputStream(file);
+                                File outFile = new File(new File(newPath), filename);
+                                OutputStream out = new FileOutputStream(outFile);
+                                copyFile(in, out);
+
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }
+                    setNewPath(newPath);
+                    askToRestart();
+                }
+
+            }
+        });
+        builder.show();
+    }
+
+
+
+    private void coprFiles(){
+
+    }
+
+
+    private void setNewPath(String newPath){
+        String content = null;
+
+        try {
+            content = org.apache.commons.io.FileUtils.readFileToString(new File(pathToConfig), "UTF-8");
+            content = content.replaceAll(getPathToRootDir(),newPath);
+            File tempFile = new File(pathToConfig);
+            org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+        } catch (IOException e) {
+            //Simple exception handling, replace with what's necessary for your use case!
+            throw new RuntimeException("Generating file failed", e);
+        }
+    }
+    private void askToRestart(){
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(getActivity());
+        builder.setTitle("Restart Device");
+        builder.setMessage("Your device need to Restart to apply changes.");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
+
+    private boolean isGetInfectedExists() {
+        File file = new File(getPathToRootDir() + File.separator + "getinfected.php");
+        return file.exists();
+    }
+
+    private boolean isLoadingSpinnerExists() {
+        File file = new File(getPathToRootDir() + File.separator + "loading_spinner.gif");
+        return file.exists();
+    }
+
+    private void copyAssets() {
+        AssetManager assetManager = getActivity().getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list("");
+        } catch (IOException e) {
+            Log.e("tag", "Failed to get asset file list.", e);
+        }
+        if (files != null) for (String filename : files) {
+            if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
+                InputStream in = null;
+                OutputStream out = null;
+                try {
+                    in = assetManager.open(filename);
+                    File outFile = new File(new File(getPathToRootDir()), filename);
+                    out = new FileOutputStream(outFile);
+                    copyFile(in, out);
+                } catch (IOException e) {
+                    Log.e("tag", "Failed to copy asset file: " + filename, e);
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            // NOOP
+                        }
+                    }
+                    if (out != null) {
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            // NOOP
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
     }
 }

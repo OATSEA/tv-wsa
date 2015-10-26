@@ -12,13 +12,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
+import common.utils.FileUtils;
 import utils.Utils;
 
 public class HotSpotReceiver extends BroadcastReceiver {
     private static final String TAG = HotSpotReceiver.class.getSimpleName();
-    private static String htdocs = Environment.getExternalStorageDirectory() + File.separator + "htdocs";
-
     public HotSpotReceiver() {
     }
 
@@ -35,43 +35,18 @@ public class HotSpotReceiver extends BroadcastReceiver {
 
             }
 
-            Log.e(TAG,"Ip Written for hotspot");
-            checkHtdocsOK();
             String ipAddress = Utils.getIPAddress(true);
             if(ipAddress.trim().isEmpty()){
-                writeIpAddress("http://"+"localhost"+":8080");
+               FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
             }else{
-                writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
+                FileUtils.writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
             }
 
         }
     }
 
 
-    public boolean checkHtdocsOK() {
-        File file = new File(htdocs);
-        if (file.exists()) {
-            return true;
-        }
-        return file.mkdirs();
 
-    } // END checkHtdocsOK
-    private void writeIpAddress(String ipAddress){
 
-        File ipFile = new File(htdocs,"IP.txt");
-        try {
-            FileOutputStream f = new FileOutputStream(ipFile);
-            PrintWriter pw = new PrintWriter(f);
-            pw.print(ipAddress);
-            pw.flush();
-            pw.close();
-            f.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Log.i(TAG, "******* File not found. Did you" +
-                    " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

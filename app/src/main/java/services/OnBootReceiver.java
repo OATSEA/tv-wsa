@@ -15,7 +15,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
+import common.utils.FileUtils;
+import common.utils.PreferenceHelper;
 import tasks.CommandTask;
 import utils.Utils;
 
@@ -23,14 +26,13 @@ public class OnBootReceiver extends BroadcastReceiver {
 
     private static final String TAG = OnBootReceiver.class.getSimpleName();
 
-    private static String htdocs = Environment.getExternalStorageDirectory() + File.separator + "htdocs";
     @Override
     public void onReceive(Context context, Intent intent) {
     	
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 
-            checkHtdocsOK();
-            writeIpAddress("http://"+"localhost:8080");
+            PreferenceHelper.putBoolean(context,"restart","restart",false);
+            FileUtils.writeIpAddress("http://"+"localhost:8080");
         	final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (preferences.getBoolean("enable_server_on_boot", false)) {
                 
@@ -53,31 +55,4 @@ public class OnBootReceiver extends BroadcastReceiver {
     }
 
 
-    public boolean checkHtdocsOK() {
-        File file = new File(htdocs);
-        if (file.exists()) {
-            return true;
-        }
-        return file.mkdirs();
-
-    } // END checkHtdocsOK
-
-    private void writeIpAddress(String ipAddress){
-
-        File ipFile = new File(htdocs,"IP.txt");
-        try {
-            FileOutputStream f = new FileOutputStream(ipFile);
-            PrintWriter pw = new PrintWriter(f);
-            pw.print(ipAddress);
-            pw.flush();
-            pw.close();
-            f.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Log.i(TAG, "******* File not found. Did you" +
-                    " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

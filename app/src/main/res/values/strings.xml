@@ -117,5 +117,8 @@
     <string name="about_share_friends">Share</string>
     <string name="about_rate_me">Rate Us on Google Play</string>
 
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

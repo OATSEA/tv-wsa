@@ -99,13 +99,11 @@ public class RepoInstallerTask extends AsyncTask<String, String, Boolean> {
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
         Log.e(TAG, "Success  :" + aBoolean);
-        if(aBoolean){
+
             if(onRepoInstalledListener!=null){
                 onRepoInstalledListener.repoInstalled();
             }
-        }else{
 
-        }
 
     }
 
@@ -116,9 +114,9 @@ public class RepoInstallerTask extends AsyncTask<String, String, Boolean> {
 
         if(values[0].equals(INSTALL_DONE) ){
 
-            if(onRepoInstalledListener!=null){
+           /* if(onRepoInstalledListener!=null){
                 onRepoInstalledListener.repoInstalled();
-            }
+            }*/
         }
        /* if (values[0].equals(INSTALL_DONE) || values[0].equals(INSTALL_ERROR)) {
             int resId = values[0].equals(INSTALL_DONE) ? R.string.core_apps_installed :

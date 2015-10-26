@@ -63,4 +63,7 @@
     <item name="about_subtitle_text_color" type="color">@color/common_deep_gray_on_blue</item>
     <item name="about_mail_text_color" type="color">@color/common_deep_gray_on_blue</item>
     <color name="about_version_bg_color">#ff3bb9fc</color>
+    <color name="accent_material_dark">#ffffff</color>
+    <color name="background_material_dark">#000000</color>
+    <color name="accent_material_light">#ffffff</color>
 </resources>

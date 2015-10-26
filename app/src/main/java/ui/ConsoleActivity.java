@@ -5,9 +5,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+
 
 
 import org.teachervirus.AppController;
@@ -16,7 +19,7 @@ import org.teachervirus.R;
 import listeners.OnInflationListener;
 
 
-public class ConsoleActivity extends AppCompatActivity implements OnInflationListener {
+public class ConsoleActivity extends AppCompatActivity implements OnInflationListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,9 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
             case R.id.ll_about:
                 return new AboutFragment();
 
+            case R.id.ll_dir:
+                return new ConfigureDirectoryFragment();
+
             default:
                 return null;
         }
@@ -90,7 +96,6 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
     @Override
     protected void onStop() {
         super.onStop();
-        finish();
     }
 
     protected void inflateFragment(int fragmentId) {
@@ -116,4 +121,6 @@ public class ConsoleActivity extends AppCompatActivity implements OnInflationLis
             AppController.toast(this, "Unable to inflate fragment");
         }
     }
+
+
 }

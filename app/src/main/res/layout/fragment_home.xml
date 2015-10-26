@@ -47,7 +47,7 @@
                         android:layout_centerHorizontal="true"
                         android:layout_marginLeft="7.0dip"
                         android:enabled="true"
-
+                        android:textColor="@color/black"
                         android:textOff="@string/stopped"
                         android:textOn="@string/running" />
 
@@ -92,6 +92,7 @@
                         android:layout_width="fill_parent"
                         android:layout_marginLeft="6.0dip"
                         android:padding="10.0dip"
+                        android:textColor="@color/black"
                         android:text="Teacher Virus" />
 
                     <ImageView
@@ -135,6 +136,7 @@
                             android:layout_width="fill_parent"
                             android:layout_marginLeft="6.0dip"
                             android:padding="10.0dip"
+                            android:textColor="@color/black"
                             android:text="Stop Webserver" />
 
                         <ImageView
@@ -145,6 +147,55 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20.0dip"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/ll_dir"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/table_whole_bg_all"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="50.0dip"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="8.0dip"
+                            android:src="@drawable/ic_folder"
+                             />
+
+                        <TextView
+                            android:id="@+id/tv_dir"
+                            android:layout_height="wrap_content"
+                            android:layout_width="fill_parent"
+                            android:layout_marginLeft="6.0dip"
+                            android:padding="10.0dip"
+                            android:textColor="@color/black"
+                            android:text="Change Directory" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingRight="15.0dip"
+                            android:src="@drawable/next_grey" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+
+
 
 
 
@@ -223,6 +274,7 @@
                             android:layout_width="fill_parent"
                             android:layout_marginLeft="6.0dip"
                             android:padding="10.0dip"
+                            android:textColor="@color/black"
                             android:text="Package Manager" />
 
                         <ImageView
@@ -265,6 +317,7 @@
                             android:layout_width="fill_parent"
                             android:layout_marginLeft="6.0dip"
                             android:padding="10.0dip"
+                            android:textColor="@color/black"
                             android:text="Configurations" />
 
                         <ImageView
@@ -350,6 +403,7 @@
                             android:layout_height="wrap_content"
                             android:layout_width="fill_parent"
                             android:layout_marginLeft="6.0dip"
+                            android:textColor="@color/black"
                             android:padding="10.0dip"
                             android:text="About" />
 

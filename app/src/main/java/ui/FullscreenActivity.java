@@ -1,17 +1,14 @@
 package ui;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.net.ConnectivityManager;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,39 +16,34 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import org.teachervirus.Constants;
+import org.teachervirus.FilePickerActivity;
 import org.teachervirus.R;
 import org.xwalk.core.XWalkPreferences;
-import org.xwalk.core.XWalkResourceClient;
-import org.xwalk.core.XWalkUIClient;
 import org.xwalk.core.XWalkView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import common.utils.FileUtils;
+import common.utils.PreferenceHelper;
 import eu.chainfire.libsuperuser.Shell;
 import services.ServerService;
 import tasks.CommandTask;
@@ -62,116 +54,109 @@ import utils.Utils;
 // https://gist.github.com/rduplain/2638913
 // https://developer.chrome.com/multidevice/webview/gettingstarted
 
-// ** TO DO ***
-// 0. Download getinfected.php from github and unzip into /mnt/sdcard/htdocs
-//  - with option to download from alternative address if unable to access github
-// 1. Start Webserver (DroidPHP) via INTENT?? (and confirm success)
-// 2. Test can access web pages on local host
-// 3. Provide network IP address of this device so can infect
-
-
-public class FullscreenActivity extends Activity {
+public class FullscreenActivity extends AppCompatActivity {
 
 
     private XWalkView xWalkWebView;
     private static final String TAG = FullscreenActivity.class.getSimpleName();
 
+    private static final int REQ_DIR = 101;
     // Progress Dialog
     private ProgressDialog pDialog;
     public static final int progress_bar_type = 0;
     private static final int DEFAULT_COUNTDOWN_TIME = 60 * 1000; // one minute
     private static final int DEFAULT_INTERVAL = 5000; // 5 second
-
-    private SharedPreferences preferences;
-
-    private CountDownTimer countDownTimer;
-
     private static String file_url = "https://www.github.com/OATSEA/getinfected/zipball/master";  // File url to download - github
     private static String getinfected_url = "http://localhost:8080/getinfected.php"; // getinfected installer
-
     private static String play_url = "http://localhost:8080/play";
 
-    private static String htdocs = Environment.getExternalStorageDirectory() + File.separator + "htdocs";
-    private static String up = htdocs + File.separator + "play" + File.separator + "up.html";
-
-
-
-    class MyResourceClient extends XWalkResourceClient {
-        MyResourceClient(XWalkView view) {
-            super(view);
-        }
-
-        @Override
-        public void onLoadStarted(XWalkView view, String url) {
-
-            super.onLoadStarted(view, url);
-        }
-
-        @Override
-        public void onLoadFinished(XWalkView view, String url) {
-            super.onLoadFinished(view, url);
-        }
-    }
-
-    class MyUIClient extends XWalkUIClient {
-        MyUIClient(XWalkView view) {
-            super(view);
-        }
-
-        @Override
-        public void onFullscreenToggled(XWalkView view, boolean enterFullscreen) {
-            super.onFullscreenToggled(view, enterFullscreen);
-        }
-
-
-        @Override
-        public void onPageLoadStarted(XWalkView view, String url) {
-
-            super.onPageLoadStarted(view, url);
-        }
-    }
-
+    private SharedPreferences preferences;
+    private CountDownTimer countDownTimer;
+    private RadioButton mDefaultRadio,mSelectedRadio;
+    private LinearLayout layoutDirChooser;
+    private AppCompatButton btnGo,btnChangePath;
+    private AppCompatTextView txtDefaultPath , txtSelectedPath;
+    private String selectedPath = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
+        hideSystemUI();
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("stop"));
 
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(this);
 
+        layoutDirChooser=(LinearLayout)findViewById(R.id.layout_config);
+
+        mDefaultRadio=(RadioButton)findViewById(R.id.radioDefault);
+        mSelectedRadio=(RadioButton)findViewById(R.id.radioSelectPath);
+        btnGo=(AppCompatButton)findViewById(R.id.btnGO);
+        btnChangePath=(AppCompatButton)findViewById(R.id.btnChangePath);
+        txtDefaultPath=(AppCompatTextView)findViewById(R.id.txtDefaultPath);
+        txtSelectedPath=(AppCompatTextView)findViewById(R.id.txtSelectedPath);
+
+        btnGo.setOnClickListener(mOnClickListener);
+        btnChangePath.setOnClickListener(mOnClickListener);
+        mDefaultRadio.setOnCheckedChangeListener(onCheckedChangeListener);
+        mSelectedRadio.setOnCheckedChangeListener(onCheckedChangeListener);
+
         countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
-        countDownTimer.start();
+        xWalkWebView = (XWalkView) findViewById(R.id.xwalkWebView);
 
-        checkHtdocsOK();
+        if(!PreferenceHelper.getBoolean(FullscreenActivity.this,"restart","restart")){
+            installAndCheckRepo();
 
-
-            if(!isGetInfectedExists() || !isLoadingSpinnerExists()){
-                copyAssets();
-            }
-
-
-
-
-
-
-        String ipAddress = Utils.getIPAddress(true);
-        if(ipAddress.trim().isEmpty()){
-            writeIpAddress("http://"+"localhost"+":8080");
-        }else{
-            writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
         }
 
 
+    }
+
+    private void forceTOexit(){
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(FullscreenActivity.this);
+        builder.setTitle("Restart Device");
+        builder.setMessage("Restart is required to apply changes made to installation directory.");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
+
+    private CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            final int id = buttonView.getId();
+
+            switch (id){
+                case R.id.radioDefault:
+                    if(isChecked){
+                        mSelectedRadio.setChecked(false);
+                    }
+                    break;
+
+                case R.id.radioSelectPath:
+                    if(isChecked){
+                        mDefaultRadio.setChecked(false);
+                    }
+                    break;
+            }
+        }
+    };
+
+    private void installAndCheckRepo(){
 
         if (preferences.getBoolean("enable_server_on_app_startup", false)) {
-
-
             startService(new Intent(FullscreenActivity.this, ServerService.class));
-
             final boolean enableSU = preferences.getBoolean("run_as_root", false);
             final String execName = preferences.getString("use_server_httpd", "lighttpd");
             final String bindPort = preferences.getString("server_port", "8080");
@@ -185,20 +170,104 @@ public class FullscreenActivity extends Activity {
             task.setOnRepoInstalledListener(new RepoInstallerTask.OnRepoInstalledListener() {
                 @Override
                 public void repoInstalled() {
-                    Log.e(TAG,"Repo installed");
+                    Log.e(TAG, "Repo installed");
                     new ConnectionListenerTask().execute();
                 }
             });
             task.execute("", Constants.INTERNAL_LOCATION.concat("/"));
-        }else{
+        } else {
             new ConnectionListenerTask().execute();
         }
-        Toast.makeText(FullscreenActivity.this,"Running Cross walk",Toast.LENGTH_SHORT).show();
+    }
 
-        xWalkWebView=(XWalkView)findViewById(R.id.xwalkWebView);
-        xWalkWebView.setResourceClient(new MyResourceClient(xWalkWebView));
-        xWalkWebView.setUIClient(new MyUIClient(xWalkWebView));
 
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            final int id = v.getId();
+            switch (id){
+                case R.id.btnGO:
+                    if(mDefaultRadio.isChecked()){
+                        String dir = FileUtils.getPathToRootDir();
+                        onDirSelected(dir);
+                    }else if(mSelectedRadio.isChecked()){
+                        if(selectedPath.length()>0){
+                            onDirSelected(selectedPath);
+                        }else{
+                            Toast.makeText(FullscreenActivity.this, "Please select path", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    break;
+
+                case R.id.btnChangePath:
+                    Intent mIntent = new Intent(FullscreenActivity.this,FilePickerActivity.class);
+                    mIntent.putExtra("path",selectedPath);
+                    startActivityForResult(mIntent,REQ_DIR);
+                    break;
+            }
+        }
+    };
+
+
+    private void onDirSelected(String dir){
+
+        if(dir.equals("/mnt/sdcard/")){
+            dir = "/mnt/sdcard/TeacherVirus/";
+        }
+        File mFile = new File(dir);
+        if(!mFile.exists()){
+            mFile.mkdirs();
+            FileUtils.setServerRootDir(mFile);
+            askToRestart();
+        }else{
+            if(!mFile.getPath().equals(FileUtils.getPathToRootDir())){
+                FileUtils.setServerRootDir(mFile);
+                askToRestart();
+            }else{
+                configServer();
+            }
+
+        }
+        layoutDirChooser.setVisibility(View.GONE);
+        xWalkWebView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode == REQ_DIR){
+            if(resultCode == RESULT_OK){
+                selectedPath = data.getStringExtra("path");
+                txtSelectedPath.setText(selectedPath);
+                mSelectedRadio.setChecked(true);
+            }else if(resultCode == RESULT_CANCELED){
+                mDefaultRadio.setChecked(true);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+
+    private void askToRestart(){
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(FullscreenActivity.this);
+        builder.setTitle("Restart Device");
+        builder.setMessage("Your device need to Restart to apply changes.");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                PreferenceHelper.putBoolean(FullscreenActivity.this, "restart", "restart", true);
+                dialog.dismiss();
+                configServer();
+            }
+        });
+
+        builder.show();
+    }
+    private void hideSystemUI() {
         // Hide Everything but Web Page:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
@@ -210,85 +279,15 @@ public class FullscreenActivity extends Activity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-            // Hide the bottom bar and prevent it from reactivating
-            // Requires minimym of 11
-            // Source: http://stackoverflow.com/questions/11027193/maintaining-lights-out-mode-view-setsystemuivisibility-across-restarts
-           /* final View rootView = getWindow().getDecorView();
-            // rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-
-            // New Immersive config: https://developer.android.com/training/system-ui/immersive.htm
-            rootView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
-
-
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-
-            rootView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-                @Override
-                public void onSystemUiVisibilityChange(int visibility) {
-                    if (visibility == View.SYSTEM_UI_FLAG_VISIBLE) {
-                        *//**//* rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                        rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                        rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-                        *//**//*
-                        // New Immersive config: https://developer.android.com/training/system-ui/immersive.html
-
-                        rootView.setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-                    }
-                }
-            });*/
         } // END Hide Everything*/
-
-
-    } // END onCreate
-
-
-    private boolean isInstalled(){
-        boolean playExists = false,tempExists = false;
-        File parentDir = new File(htdocs);
-        File[] allFiles = parentDir.listFiles();
-
-        for(File file : allFiles){
-
-            if(file.isDirectory()){
-                if(file.getName().equalsIgnoreCase("Play")){
-                    playExists = true;
-                }
-                if(file.getName().startsWith("unzip_temp")){
-                   tempExists = true;
-                }
-            }
-        }
-
-        if(playExists && !tempExists){
-            return true;
-        }
-        return false;
     }
+
+
 
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        if(hasFocus){
+        if (hasFocus) {
 
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -321,80 +320,6 @@ public class FullscreenActivity extends Activity {
         super.onDestroy();
     }
 
-    private boolean isGetInfectedExists(){
-        File file = new File(htdocs+File.separator+"getinfected.php");
-        return file.exists();
-    }
-
-    private boolean isLoadingSpinnerExists(){
-        File file = new File(htdocs+File.separator+"loading_spinner.gif");
-        return file.exists();
-    }
-
-    private void copyAssets() {
-        AssetManager assetManager = getAssets();
-        String[] files = null;
-        try {
-            files = assetManager.list("");
-        } catch (IOException e) {
-            Log.e("tag", "Failed to get asset file list.", e);
-        }
-        if (files != null) for (String filename : files) {
-            if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
-                InputStream in = null;
-                OutputStream out = null;
-                try {
-                    in = assetManager.open(filename);
-                    File outFile = new File(new File(htdocs), filename);
-                    out = new FileOutputStream(outFile);
-                    copyFile(in, out);
-                } catch (IOException e) {
-                    Log.e("tag", "Failed to copy asset file: " + filename, e);
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            // NOOP
-                        }
-                    }
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            // NOOP
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-    }
-
-
-    private void openPage(String url) {
-        xWalkWebView.load(url, null);
-
-        // turn on debugging
-        XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
-    }
-
-
-    public boolean checkHtdocsOK() {
-        File file = new File(htdocs);
-        if (file.exists()) {
-            return true;
-        }
-        return file.mkdirs();
-
-    } // END checkHtdocsOK
 
 
     @Override
@@ -413,7 +338,15 @@ public class FullscreenActivity extends Activity {
             rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
 
-    } // END onResume
+
+        if(PreferenceHelper.getBoolean(FullscreenActivity.this,"restart","restart")){
+
+            forceTOexit();
+        }
+
+
+    }
+
 
 
     /**
@@ -438,102 +371,49 @@ public class FullscreenActivity extends Activity {
     }
 
 
-    private void showDialog(){
-        if(pDialog!=null && pDialog.isShowing()){
+
+
+    @Override
+    public void onBackPressed() {
+
+        super.onBackPressed();
+    } // END onBackPressed
+
+
+    private boolean isGetInfectedExists() {
+        File file = new File(FileUtils.getPathToRootDir() + File.separator + "getinfected.php");
+        return file.exists();
+    }
+
+    private boolean isLoadingSpinnerExists() {
+        File file = new File(FileUtils.getPathToRootDir() + File.separator + "loading_spinner.gif");
+        return file.exists();
+    }
+
+
+
+    private void openPage(String url) {
+        xWalkWebView.load(url, null);
+
+        // turn on debugging
+        XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
+    }
+
+
+
+    private void showDialog() {
+        if (pDialog != null && pDialog.isShowing()) {
             pDialog.cancel();
             pDialog = null;
         }
 
-        pDialog = ProgressDialog.show(FullscreenActivity.this,"Loading Resource","Please wait..",true);
+        pDialog = ProgressDialog.show(FullscreenActivity.this, "Loading Resource", "Please wait..", true);
     }
 
-    private void dismissDialog(){
-        if(pDialog!=null && pDialog.isShowing()){
+    private void dismissDialog() {
+        if (pDialog != null && pDialog.isShowing()) {
             pDialog.dismiss();
-            pDialog=null;
-        }
-    }
-
-
-    // Make the back button go "back" in browser rather than back to launcher
-    @Override
-    public void onBackPressed() {
-
-      super.onBackPressed();
-    } // END onBackPressed
-
-
-
-
-    public class MyTimer extends CountDownTimer {
-
-
-        public MyTimer(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);
-        }
-
-        @Override
-        public void onTick(long millisUntilFinished) {
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(serverWorking()){
-                        countDownTimer.cancel();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-
-                                if(isInstalled()){
-                                    openPage(play_url);
-                                    Toast.makeText(FullscreenActivity.this,"installation found",Toast.LENGTH_SHORT).show();
-                                }else{
-                                    openPage(getinfected_url);
-                                    Toast.makeText(FullscreenActivity.this,"installation not found",Toast.LENGTH_SHORT).show();
-                                }
-
-
-                            }
-                        });
-                    }
-                }
-            }).start();
-
-        }
-
-        @Override
-        public void onFinish() {
-            dismissDialog();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(serverWorking()){
-                        countDownTimer.cancel();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                if(isInstalled()){
-                                    openPage(play_url);
-                                    Toast.makeText(FullscreenActivity.this,"installation found",Toast.LENGTH_SHORT).show();
-                                }else{
-                                    openPage(getinfected_url);
-                                    Toast.makeText(FullscreenActivity.this,"installation not found",Toast.LENGTH_SHORT).show();
-                                }
-
-                            }
-                        });
-                    }else{
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(FullscreenActivity.this,"Please restart you device",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                }
-            }).start();
+            pDialog = null;
         }
     }
 
@@ -562,13 +442,150 @@ public class FullscreenActivity extends Activity {
     }
 
 
+
+    private void executeSu() {
+        startService(new Intent(FullscreenActivity.this, ServerService.class));
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForConnect(this, execName, bindPort);
+        task.enableSU(enableSU);
+        task.setOnCommandTaskExecutedListener(new CommandTask.OnCommandTaskExecutedListener() {
+            @Override
+            public void onTaskCompleted() {
+
+                if (FileUtils.ensureLighttpdConfigExists()) {
+                    File rootWebDir = new File(FileUtils.getPathToRootDir());
+                    if (rootWebDir.exists()) {
+                        configServer();
+                    } else {
+
+                        xWalkWebView.setVisibility(View.INVISIBLE);
+                        layoutDirChooser.setVisibility(View.VISIBLE);
+                        txtDefaultPath.setText(FileUtils.getPathToRootDir());
+
+                    }
+
+
+                }
+            }
+        });
+        task.execute();
+    }
+
+    private void disableServer() {
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForDisconnect(this);
+        task.enableSU(enableSU);
+        task.execute();
+
+        NotificationManager notify = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        stopService(new Intent(this, ServerService.class));
+    }
+
+
+
+
+    private void configServer(){
+        showDialog();
+        String ipAddress = Utils.getIPAddress(true);
+        if (ipAddress.trim().isEmpty()) {
+            FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
+        } else {
+            FileUtils. writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
+        }
+        if(!isGetInfectedExists() || ! isLoadingSpinnerExists()){
+            FileUtils.copyAssets(FullscreenActivity.this);
+        }
+        countDownTimer.start();
+    }
+
+
+
+    public class MyTimer extends CountDownTimer {
+
+
+        public MyTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (serverWorking()) {
+                        countDownTimer.cancel();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dismissDialog();
+
+                                if (FileUtils.isInstalled()) {
+                                    openPage(play_url);
+                                    Toast.makeText(FullscreenActivity.this, "installation found", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    openPage(getinfected_url);
+                                    Toast.makeText(FullscreenActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
+                                }
+
+
+                            }
+                        });
+                    }
+                }
+            }).start();
+
+        }
+
+        @Override
+        public void onFinish() {
+            dismissDialog();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (serverWorking()) {
+                        countDownTimer.cancel();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (FileUtils.isInstalled()) {
+                                    openPage(play_url);
+                                    Toast.makeText(FullscreenActivity.this, "installation found", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    openPage(getinfected_url);
+                                    Toast.makeText(FullscreenActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(FullscreenActivity.this, "Please restart you device", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+    }
+
+
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
 
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            showDialog();
+
         }
 
         @Override
@@ -610,9 +627,8 @@ public class FullscreenActivity extends Activity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             Log.e(TAG, "Server started :" + aBoolean);
-            startService(new Intent(FullscreenActivity.this, ServerService.class));
-            executeSu();
 
+            executeSu();
 
 
         }
@@ -623,49 +639,6 @@ public class FullscreenActivity extends Activity {
         }
     }
 
-
-    private void executeSu(){
-        boolean enableSU = preferences.getBoolean("run_as_root", false);
-        String execName = preferences.getString("use_server_httpd", "lighttpd");
-        String bindPort = preferences.getString("server_port", "8080");
-        CommandTask task = CommandTask.createForConnect(this, execName, bindPort);
-        task.enableSU(enableSU);
-        task.execute();
-    }
-
-    private void disableServer(){
-        boolean enableSU = preferences.getBoolean("run_as_root", false);
-        String execName = preferences.getString("use_server_httpd", "lighttpd");
-        String bindPort = preferences.getString("server_port", "8080");
-        CommandTask task = CommandTask.createForDisconnect(this);
-        task.enableSU(enableSU);
-        task.execute();
-
-        NotificationManager notify = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        notify.cancel(143);
-        stopService(new Intent(this, ServerService.class));
-    }
-
-
-    private void writeIpAddress(String ipAddress){
-
-        File ipFile = new File(htdocs,"IP.txt");
-        try {
-            FileOutputStream f = new FileOutputStream(ipFile);
-            PrintWriter pw = new PrintWriter(f);
-            pw.print(ipAddress);
-            pw.flush();
-            pw.close();
-            f.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Log.i(TAG, "******* File not found. Did you" +
-                    " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
