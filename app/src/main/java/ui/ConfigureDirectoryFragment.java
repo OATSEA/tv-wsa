@@ -131,7 +131,7 @@ public class ConfigureDirectoryFragment extends Fragment {
         if(selectedPath.equals("/mnt/sdcard/")){
             selectedPath = "/mnt/sdcard/TeacherVirus";
         }
-        copyDefault();
+
 
         try {
             copyDirectoryOneLocationToAnotherLocation(new File(FileUtils.getPathToRootDir())
@@ -184,8 +184,8 @@ public class ConfigureDirectoryFragment extends Fragment {
                 if(mCopyCheckbox.isChecked() && mOverWrightCheckBox.isChecked()){
                     destinationFolder.delete();
                     destinationFolder.mkdirs();
-                }else if(mCopyCheckbox.isChecked() && !mOverWrightCheckBox.isChecked()){
-                    return;
+                }else if(!mCopyCheckbox.isChecked() && !mOverWrightCheckBox.isChecked()){
+                    copyDefault();
                 }
             }
 
