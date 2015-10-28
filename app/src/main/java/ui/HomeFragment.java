@@ -84,8 +84,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("path"));
+
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(getActivity());
         new AsyncSystemRequirement().execute();
@@ -125,7 +124,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+
         super.onDestroy();
     }
 
@@ -286,177 +285,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         context.stopService(new Intent(getActivity(), ServerService.class));
     }
 
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String newPath = intent.getStringExtra("path");
-            if(!newPath.equalsIgnoreCase(getPathToRootDir())){
-
-                askToCopy(newPath);
-            }
-
-        }
-    };
-
-    private void askToCopy(final String newPath){
-        AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
-        builder.setTitle("Copy Data");
-        builder.setMessage("Would you like to copy all data to new directory.");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                File mOldDir = new File(getPathToRootDir());
-                if(mOldDir.isDirectory()) {
-                    File[] mFiles = mOldDir.listFiles();
-                    for (File file : mFiles) {
-                        try {
-                            InputStream in = new FileInputStream(file);
-                            File outFile = new File(new File(newPath), file.getName());
-                            OutputStream out = new FileOutputStream(outFile);
-                            copyFile(in, out);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                    setNewPath(newPath);
-                    askToRestart();
-                }
 
 
 
-            }
-        });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-               File mOldDir = new File(getPathToRootDir());
-                if(mOldDir.isDirectory()){
-                    File[] mFiles = mOldDir.listFiles();
-                    for(File file:mFiles){
-
-                        String filename = file.getName();
-                        if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
-                            try {
-                                InputStream in = new FileInputStream(file);
-                                File outFile = new File(new File(newPath), filename);
-                                OutputStream out = new FileOutputStream(outFile);
-                                copyFile(in, out);
-
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }
-                    setNewPath(newPath);
-                    askToRestart();
-                }
-
-            }
-        });
-        builder.show();
-    }
 
 
 
-    private void coprFiles(){
-
-    }
 
 
-    private void setNewPath(String newPath){
-        String content = null;
-
-        try {
-            content = org.apache.commons.io.FileUtils.readFileToString(new File(pathToConfig), "UTF-8");
-            content = content.replaceAll(getPathToRootDir(),newPath);
-            File tempFile = new File(pathToConfig);
-            org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, "UTF-8");
-        } catch (IOException e) {
-            //Simple exception handling, replace with what's necessary for your use case!
-            throw new RuntimeException("Generating file failed", e);
-        }
-    }
-    private void askToRestart(){
-        AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
-        builder.setTitle("Restart Device");
-        builder.setMessage("Your device need to Restart to apply changes.");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
-    }
-
-    private boolean isGetInfectedExists() {
-        File file = new File(getPathToRootDir() + File.separator + "getinfected.php");
-        return file.exists();
-    }
-
-    private boolean isLoadingSpinnerExists() {
-        File file = new File(getPathToRootDir() + File.separator + "loading_spinner.gif");
-        return file.exists();
-    }
-
-    private void copyAssets() {
-        AssetManager assetManager = getActivity().getAssets();
-        String[] files = null;
-        try {
-            files = assetManager.list("");
-        } catch (IOException e) {
-            Log.e("tag", "Failed to get asset file list.", e);
-        }
-        if (files != null) for (String filename : files) {
-            if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")) {
-                InputStream in = null;
-                OutputStream out = null;
-                try {
-                    in = assetManager.open(filename);
-                    File outFile = new File(new File(getPathToRootDir()), filename);
-                    out = new FileOutputStream(outFile);
-                    copyFile(in, out);
-                } catch (IOException e) {
-                    Log.e("tag", "Failed to copy asset file: " + filename, e);
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            // NOOP
-                        }
-                    }
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            // NOOP
-                        }
-                    }
-                }
-            }
-        }
-    }
 
 
-    private void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-    }
 }

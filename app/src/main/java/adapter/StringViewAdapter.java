@@ -58,7 +58,7 @@ public class StringViewAdapter extends BaseAdapter {
 			}
 
 			vh.txvTitle.setText(getItem(position).toString());
-			convertView.startAnimation(getAnimation());
+
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

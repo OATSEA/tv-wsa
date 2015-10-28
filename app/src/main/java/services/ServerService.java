@@ -1,5 +1,6 @@
 package services;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -59,12 +60,12 @@ public class ServerService extends Service {
 
         registerReceiver(mConnectionReceiver,
                 mIntentFilter);
-
+        initialize();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        initialize();
+
         return (START_NOT_STICKY);
     }
 
@@ -82,24 +83,26 @@ public class ServerService extends Service {
     }
 
     protected void initialize() {
-
         Context context = getApplicationContext();
         NotificationManager noti = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("DroidPHP service started")
                         .setContentText("Web Service started");
 
-        Intent notificationIntent = new Intent(context, ConsoleActivity.class);
+        Intent notificationIntent = new Intent(this, ConsoleActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
-                getApplicationContext(), 143, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+                this, 143, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         mBuilder.setContentIntent(contentIntent);
-        startForeground(143, mBuilder.build());
-        noti.notify(143, mBuilder.build());
+        Notification mNotificationCompat = mBuilder.build();
+        mNotificationCompat.flags |= Notification.FLAG_AUTO_CANCEL;
+        mNotificationCompat.flags |= Notification.FLAG_INSISTENT;
+        startForeground(143, mNotificationCompat);
+        noti.notify(143, mNotificationCompat);
 
         if (preferences.getBoolean("enable_screen_on", false)) {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);

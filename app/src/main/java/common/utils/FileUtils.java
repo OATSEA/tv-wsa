@@ -102,7 +102,9 @@ public class FileUtils {
                     copyFile(in, out);
                 } catch (IOException e) {
                     Log.e("tag", "Failed to copy asset file: " + filename, e);
-                } finally {
+                } catch (NullPointerException e){
+                    Log.e("Null","null pointer exception");
+                }finally {
                     if (in != null) {
                         try {
                             in.close();

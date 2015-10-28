@@ -77,6 +77,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private AppCompatButton btnGo,btnChangePath;
     private AppCompatTextView txtDefaultPath , txtSelectedPath;
     private String selectedPath = "";
+    private boolean trackTimer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,11 +108,7 @@ public class FullscreenActivity extends AppCompatActivity {
         countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
         xWalkWebView = (XWalkView) findViewById(R.id.xwalkWebView);
 
-        if(!PreferenceHelper.getBoolean(FullscreenActivity.this,"restart","restart")){
-            installAndCheckRepo();
-
-        }
-
+       installAndCheckRepo();
 
     }
 
@@ -123,6 +120,7 @@ public class FullscreenActivity extends AppCompatActivity {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                disableServer();
                 finish();
                 dialog.dismiss();
             }
@@ -190,6 +188,9 @@ public class FullscreenActivity extends AppCompatActivity {
                 case R.id.btnGO:
                     if(mDefaultRadio.isChecked()){
                         String dir = FileUtils.getPathToRootDir();
+                        if(dir.equals("/mnt/sdcard/htdocs")){
+                            dir = "/mnt/sdcard/TeacherVirus";
+                        }
                         onDirSelected(dir);
                     }else if(mSelectedRadio.isChecked()){
                         if(selectedPath.length()>0){
@@ -213,20 +214,20 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void onDirSelected(String dir){
 
-        if(dir.equals("/mnt/sdcard/")){
-            dir = "/mnt/sdcard/TeacherVirus/";
-        }
+        disableServer();
+
+        PreferenceHelper.putBoolean(FullscreenActivity.this,"restart","restart",true);
         File mFile = new File(dir);
         if(!mFile.exists()){
             mFile.mkdirs();
             FileUtils.setServerRootDir(mFile);
-            askToRestart();
+            executeSu();
         }else{
             if(!mFile.getPath().equals(FileUtils.getPathToRootDir())){
                 FileUtils.setServerRootDir(mFile);
-                askToRestart();
+               executeSu();
             }else{
-                configServer();
+               executeSu();
             }
 
         }
@@ -260,8 +261,9 @@ public class FullscreenActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 PreferenceHelper.putBoolean(FullscreenActivity.this, "restart", "restart", true);
+                disableServer();
                 dialog.dismiss();
-                configServer();
+                finish();
             }
         });
 
@@ -307,7 +309,7 @@ public class FullscreenActivity extends AppCompatActivity {
             xWalkWebView.pauseTimers();
             xWalkWebView.onHide();
         }
-        dismissDialog();
+
     }
 
     @Override
@@ -339,15 +341,35 @@ public class FullscreenActivity extends AppCompatActivity {
         }
 
 
-        if(PreferenceHelper.getBoolean(FullscreenActivity.this,"restart","restart")){
 
-            forceTOexit();
-        }
+       /* if(PreferenceHelper.getBoolean(FullscreenActivity.this,"restart","restart")){
 
+            executeSu();
+        }*/
 
     }
 
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        if(trackTimer){
+            outState.putBoolean("track",true);
+        }else{
+            outState.putBoolean("track", false);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        boolean state = savedInstanceState.getBoolean("track");
+        if(!trackTimer && state){
+            unknownError();
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     /**
      * Showing Dialog
@@ -376,6 +398,7 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
+        countDownTimer.cancel();
         super.onBackPressed();
     } // END onBackPressed
 
@@ -411,9 +434,13 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private void dismissDialog() {
-        if (pDialog != null && pDialog.isShowing()) {
-            pDialog.dismiss();
-            pDialog = null;
+        try {
+            if (pDialog != null && pDialog.isShowing()) {
+                pDialog.dismiss();
+                pDialog = null;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -457,12 +484,16 @@ public class FullscreenActivity extends AppCompatActivity {
                 if (FileUtils.ensureLighttpdConfigExists()) {
                     File rootWebDir = new File(FileUtils.getPathToRootDir());
                     if (rootWebDir.exists()) {
+                        xWalkWebView.setVisibility(View.VISIBLE);
                         configServer();
                     } else {
 
                         xWalkWebView.setVisibility(View.INVISIBLE);
                         layoutDirChooser.setVisibility(View.VISIBLE);
-                        txtDefaultPath.setText(FileUtils.getPathToRootDir());
+                        if(FileUtils.getPathToRootDir().equals("/mnt/sdcard/htdocs")){
+                            txtDefaultPath.setText("/mnt/sdcard/TeacherVirus");
+                        }
+
 
                     }
 
@@ -502,6 +533,7 @@ public class FullscreenActivity extends AppCompatActivity {
             FileUtils.copyAssets(FullscreenActivity.this);
         }
         countDownTimer.start();
+        trackTimer = true;
     }
 
 
@@ -516,6 +548,7 @@ public class FullscreenActivity extends AppCompatActivity {
         @Override
         public void onTick(long millisUntilFinished) {
 
+            Log.e(TAG,"on tick");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -537,6 +570,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
                             }
                         });
+                        PreferenceHelper.putBoolean(FullscreenActivity.this,"restart","restart",false);
                     }
                 }
             }).start();
@@ -545,6 +579,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         @Override
         public void onFinish() {
+            trackTimer = false;
             dismissDialog();
             new Thread(new Runnable() {
                 @Override
@@ -565,19 +600,49 @@ public class FullscreenActivity extends AppCompatActivity {
 
                             }
                         });
+                        PreferenceHelper.putBoolean(FullscreenActivity.this, "restart", "restart", false);
                     } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(FullscreenActivity.this, "Please restart you device", Toast.LENGTH_LONG).show();
+
+                                try {
+                                    if (PreferenceHelper.getBoolean(FullscreenActivity.this, "restart", "restart")) {
+                                        askToRestart();
+                                    } else {
+                                        unknownError();
+                                    }
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+
                             }
                         });
+
                     }
                 }
             }).start();
         }
     }
 
+
+    private void unknownError(){
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(FullscreenActivity.this);
+        builder.setTitle("Restart Device");
+        builder.setMessage("Your device need to Restart to apply changes.");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                disableServer();
+                dialog.dismiss();
+                finish();
+            }
+        });
+
+        builder.show();
+    }
 
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
 
@@ -644,9 +709,15 @@ public class FullscreenActivity extends AppCompatActivity {
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             disableServer();
-            finish();
+            if(intent.getAction().equals("stop")){
+
+                finish();
+            }else if(intent.getAction().equals("reboot")){
+
+                executeSu();
+            }
+
         }
     };
 

@@ -69,7 +69,8 @@ public class FilePickerActivity extends AppCompatActivity {
     private void FillFolders(String path) {
 
         File storageDir = new File(path.length() == 0 ? "/mnt/" : path);
-
+        path = storageDir.getAbsolutePath();
+        sSelectedPath=storageDir.getAbsolutePath();
         if (storageDir.isDirectory()) {
             sSelectedPath = storageDir.getAbsolutePath();
             String[] mStrings = storageDir.list();
@@ -77,7 +78,8 @@ public class FilePickerActivity extends AppCompatActivity {
             for (String s : mStrings) {
                 File f = new File(String.format("%s/%s",
                         storageDir.getAbsolutePath(), s));
-                if (f.isDirectory() && !f.getName().startsWith("."))
+               // if (f.isDirectory() && !f.getName().startsWith("."))
+                 if(isValidFile(f))
                     folders.add(s);
             }
 
@@ -95,6 +97,15 @@ public class FilePickerActivity extends AppCompatActivity {
 
     }
 
+
+    private boolean isValidFile(final File file) {
+        boolean allownameCHande = false;
+        return (file != null && file.isDirectory()
+                && file.canRead()
+                && !file.getName().startsWith(".")
+                && (allownameCHande || file.canWrite()));
+    }
+
         private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -107,8 +118,7 @@ public class FilePickerActivity extends AppCompatActivity {
 
                     try {
                         if (getTitle().toString().equalsIgnoreCase("/mnt")) {
-                            setResult(RESULT_CANCELED);
-                            finish();
+                            onBackPressed();
                             return;
                         }
                         sSelectedPath = sSelectedPath.substring(0,
@@ -125,6 +135,8 @@ public class FilePickerActivity extends AppCompatActivity {
 
                         File storageDir = new File(sSelectedPath);
                         sSelectedPath = storageDir.getAbsolutePath();
+                        sSelectedPath += "/TeacherVirus";
+
                         if (storageDir.isDirectory()) {
                             Intent intent = new Intent();
                             intent.putExtra(SELECTED_PATH, sSelectedPath);

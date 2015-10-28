@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
@@ -76,7 +77,7 @@ public class ConfigureDirectoryFragment extends Fragment {
         btnChangePath.setOnClickListener(mOnClickListener);
         btnCancel.setOnClickListener(mOnClickListener);
 
-        txtCurrentPath.setText("Current path : "+FileUtils.getPathToRootDir());
+        txtCurrentPath.setText("Current path : " + FileUtils.getPathToRootDir());
 
         super.onViewCreated(view, savedInstanceState);
     }
@@ -91,13 +92,19 @@ public class ConfigureDirectoryFragment extends Fragment {
                 case R.id.btnChange:
                     if(mSelectedPathRadio.isChecked()){
                         if(selectedPath.length()>0){
+
                             if(mCopyCheckbox.isChecked()) {
                                 onDirChanged();
+                                FileUtils.setServerRootDir(new File(selectedPath));
                             }else{
                                 copyDefault();
+                                FileUtils.setServerRootDir(new File(selectedPath));
                             }
-                            FileUtils.setServerRootDir(new File(selectedPath));
-                            askToRestart();
+
+                            PreferenceHelper.putBoolean(getActivity(), "restart", "restart", true);
+                            Intent intent = new Intent("reboot");
+                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                            getActivity().finish();
                         }else{
                             Toast.makeText(getActivity(), "Please select path", Toast.LENGTH_SHORT).show();
                         }
@@ -118,28 +125,13 @@ public class ConfigureDirectoryFragment extends Fragment {
         }
     };
 
-    private void askToRestart(){
-        AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
-        builder.setTitle("Restart Device");
-        builder.setMessage("Your device need to Restart to apply changes.");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
 
-                PreferenceHelper.putBoolean(getActivity(),"restart","restart",true);
-                dialog.dismiss();
-                getActivity().finish();
-            }
-        });
-
-        builder.show();
-    }
     private void onDirChanged(){
 
         if(selectedPath.equals("/mnt/sdcard/")){
-            selectedPath = "/mnt/sdcard/TeacherVirus/";
+            selectedPath = "/mnt/sdcard/TeacherVirus";
         }
+        copyDefault();
 
         try {
             copyDirectoryOneLocationToAnotherLocation(new File(FileUtils.getPathToRootDir())
@@ -151,8 +143,19 @@ public class ConfigureDirectoryFragment extends Fragment {
     }
 
     private void copyDefault(){
-        File mFile = new File(FileUtils.getPathToRootDir());
-        String[] files = mFile.list();
+        String path = FileUtils.getPathToRootDir();
+        if(path.equals("/mnt/sdcard/htdocs")){
+            path = "/mnt/sdcard/TeacheVirus";
+
+        }
+        if(selectedPath.equals("")){
+            selectedPath = path;
+        }
+        File mDefaultFIle = new File(path);
+        if(!mDefaultFIle.exists()){
+            mDefaultFIle.mkdirs();
+        }
+        String[] files = mDefaultFIle.list();
         File dest= new File(selectedPath);
         if(!dest.exists()){
             dest.mkdirs();
@@ -162,7 +165,7 @@ public class ConfigureDirectoryFragment extends Fragment {
             if (filename.contains("getinfected.php") || filename.contains("loading_spinner.gif")){
                 try {
 
-                    copyDirectoryOneLocationToAnotherLocation(new File(mFile,filename)
+                    copyDirectoryOneLocationToAnotherLocation(new File(mDefaultFIle,filename)
                             ,new File(dest,filename));
                 } catch (IOException e) {
                     e.printStackTrace();
