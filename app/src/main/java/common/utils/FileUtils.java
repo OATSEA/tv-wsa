@@ -157,7 +157,7 @@ public class FileUtils {
     }
 
 
-    public static void setServerRootDir(File mServerRootDir){
+    public static void setServerRootDir(Context context,File mServerRootDir){
 
 
         String content = null;
@@ -167,6 +167,7 @@ public class FileUtils {
             content = content.replaceAll(getPathToRootDir(), mServerRootDir.getPath());
             File tempFile = new File(pathToConfig);
             org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+            PreferenceHelper.putString(context,"dir","dir",mServerRootDir.getPath());
         } catch (IOException e) {
             //Simple exception handling, replace with what's necessary for your use case!
             throw new RuntimeException("Generating file failed", e);

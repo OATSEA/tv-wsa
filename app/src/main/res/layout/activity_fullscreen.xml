@@ -19,7 +19,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="64dp"
-        android:visibility="invisible">
+        android:visibility="gone">
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/txtTitle"
@@ -28,6 +28,30 @@
             android:text="Choose installation path"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/txtInstalledPath"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Choose installation path"
+            android:visibility="gone"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnRetry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:visibility="gone"
+                android:text="Retry" />
+        </LinearLayout>
 
         <RadioButton
             android:id="@+id/radioDefault"

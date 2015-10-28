@@ -74,8 +74,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private CountDownTimer countDownTimer;
     private RadioButton mDefaultRadio,mSelectedRadio;
     private LinearLayout layoutDirChooser;
-    private AppCompatButton btnGo,btnChangePath;
-    private AppCompatTextView txtDefaultPath , txtSelectedPath;
+    private AppCompatButton btnGo,btnChangePath,btnRetry;
+    private AppCompatTextView txtDefaultPath , txtSelectedPath,txtInstalledPath,txtTitle;
     private String selectedPath = "";
     private boolean trackTimer = false;
 
@@ -99,9 +99,13 @@ public class FullscreenActivity extends AppCompatActivity {
         btnChangePath=(AppCompatButton)findViewById(R.id.btnChangePath);
         txtDefaultPath=(AppCompatTextView)findViewById(R.id.txtDefaultPath);
         txtSelectedPath=(AppCompatTextView)findViewById(R.id.txtSelectedPath);
+        btnRetry=(AppCompatButton)findViewById(R.id.btnRetry);
+        txtInstalledPath=(AppCompatTextView)findViewById(R.id.txtInstalledPath);
+        txtTitle=(AppCompatTextView)findViewById(R.id.txtTitle);
 
         btnGo.setOnClickListener(mOnClickListener);
         btnChangePath.setOnClickListener(mOnClickListener);
+        btnRetry.setOnClickListener(mOnClickListener);
         mDefaultRadio.setOnCheckedChangeListener(onCheckedChangeListener);
         mSelectedRadio.setOnCheckedChangeListener(onCheckedChangeListener);
 
@@ -207,6 +211,19 @@ public class FullscreenActivity extends AppCompatActivity {
                     mIntent.putExtra("path",selectedPath);
                     startActivityForResult(mIntent,REQ_DIR);
                     break;
+
+                case R.id.btnRetry:
+                    if (FileUtils.ensureLighttpdConfigExists()) {
+                        File rootWebDir = new File(FileUtils.getPathToRootDir());
+                        if(rootWebDir.exists()){
+                            xWalkWebView.setVisibility(View.VISIBLE);
+                            configServer();
+                        }else{
+                            txtInstalledPath.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                        }
+                    }
+
+                    break;
             }
         }
     };
@@ -220,11 +237,11 @@ public class FullscreenActivity extends AppCompatActivity {
         File mFile = new File(dir);
         if(!mFile.exists()){
             mFile.mkdirs();
-            FileUtils.setServerRootDir(mFile);
+            FileUtils.setServerRootDir(FullscreenActivity.this,mFile);
             executeSu();
         }else{
             if(!mFile.getPath().equals(FileUtils.getPathToRootDir())){
-                FileUtils.setServerRootDir(mFile);
+                FileUtils.setServerRootDir(FullscreenActivity.this,mFile);
                executeSu();
             }else{
                executeSu();
@@ -483,19 +500,33 @@ public class FullscreenActivity extends AppCompatActivity {
 
                 if (FileUtils.ensureLighttpdConfigExists()) {
                     File rootWebDir = new File(FileUtils.getPathToRootDir());
-                    if (rootWebDir.exists()) {
-                        xWalkWebView.setVisibility(View.VISIBLE);
-                        configServer();
-                    } else {
-
+                    String savedPath = PreferenceHelper.getString(FullscreenActivity.this,"dir","dir");
+                    if(savedPath != null && !savedPath.trim().isEmpty() && savedPath.equals(FileUtils.getPathToRootDir())){
+                        if(!rootWebDir.exists()){
+                            xWalkWebView.setVisibility(View.INVISIBLE);
+                            layoutDirChooser.setVisibility(View.VISIBLE);
+                            txtTitle.setText(savedPath+" not found.");
+                            txtInstalledPath.setText("Please check media or retry");
+                            txtInstalledPath.setVisibility(View.VISIBLE);
+                            btnRetry.setVisibility(View.VISIBLE);
+                            mDefaultRadio.setVisibility(View.GONE);
+                            txtDefaultPath.setVisibility(View.GONE);
+                        }else{
+                            xWalkWebView.setVisibility(View.VISIBLE);
+                            configServer();
+                        }
+                    }else{
                         xWalkWebView.setVisibility(View.INVISIBLE);
                         layoutDirChooser.setVisibility(View.VISIBLE);
+                        txtInstalledPath.setVisibility(View.GONE);
+                        btnRetry.setVisibility(View.GONE);
                         if(FileUtils.getPathToRootDir().equals("/mnt/sdcard/htdocs")){
                             txtDefaultPath.setText("/mnt/sdcard/TeacherVirus");
+                        }else{
+                            txtDefaultPath.setText(FileUtils.getPathToRootDir());
                         }
-
-
                     }
+
 
 
                 }
@@ -503,6 +534,10 @@ public class FullscreenActivity extends AppCompatActivity {
         });
         task.execute();
     }
+
+
+
+
 
     private void disableServer() {
         boolean enableSU = preferences.getBoolean("run_as_root", false);

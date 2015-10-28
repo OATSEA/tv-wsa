@@ -95,10 +95,10 @@ public class ConfigureDirectoryFragment extends Fragment {
 
                             if(mCopyCheckbox.isChecked()) {
                                 onDirChanged();
-                                FileUtils.setServerRootDir(new File(selectedPath));
+                                FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
                             }else{
                                 copyDefault();
-                                FileUtils.setServerRootDir(new File(selectedPath));
+                                FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
                             }
 
                             PreferenceHelper.putBoolean(getActivity(), "restart", "restart", true);
