@@ -4,6 +4,7 @@ package ui;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -43,7 +45,8 @@ public class ConfigureDirectoryFragment extends Fragment {
     private RadioButton mSelectedPathRadio;
     private CheckBox mCopyCheckbox,mOverWrightCheckBox;
     private String selectedPath="";
-
+    private ProgressBar mProgressBar;
+    private AppCompatTextView txtMsg;
 
     public ConfigureDirectoryFragment() {
         // Required empty public constructor
@@ -70,6 +73,8 @@ public class ConfigureDirectoryFragment extends Fragment {
         txtCurrentPath = (AppCompatTextView)view.findViewById(R.id.tctCurrentPath);
         btnChangePath=(AppCompatButton)view.findViewById(R.id.btnChangePath);
         btnCancel=(AppCompatButton)view.findViewById(R.id.btnCancel);
+        mProgressBar=(ProgressBar)view.findViewById(R.id.progressBar);
+        txtMsg=(AppCompatTextView)view.findViewById(R.id.txtMsg);
 
         mCopyCheckbox.setOnCheckedChangeListener(checkchangeListener);
         mOverWrightCheckBox.setOnCheckedChangeListener(checkchangeListener);
@@ -91,24 +96,8 @@ public class ConfigureDirectoryFragment extends Fragment {
 
                 case R.id.btnChange:
                     if(mSelectedPathRadio.isChecked()){
-                        if(selectedPath.length()>0){
 
-                            if(mCopyCheckbox.isChecked()) {
-                                onDirChanged();
-                                FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
-                            }else{
-                                copyDefault();
-                                FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
-                            }
-
-                            PreferenceHelper.putBoolean(getActivity(), "restart", "restart", true);
-                            Intent intent = new Intent("reboot");
-                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                            getActivity().finish();
-                        }else{
-                            Toast.makeText(getActivity(), "Please select path", Toast.LENGTH_SHORT).show();
-                        }
-
+                        new CopyTask().execute();
                     }
                     break;
 
@@ -124,6 +113,7 @@ public class ConfigureDirectoryFragment extends Fragment {
             }
         }
     };
+
 
 
     private void onDirChanged(){
@@ -240,5 +230,61 @@ public class ConfigureDirectoryFragment extends Fragment {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    public class CopyTask extends AsyncTask<Void,Void,Boolean>{
+
+        private boolean checked;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            mProgressBar.setVisibility(View.VISIBLE);
+            txtMsg.setVisibility(View.VISIBLE);
+            checked = mCopyCheckbox.isChecked();
+            btnChange.setEnabled(false);
+            btnChangePath.setEnabled(false);
+            btnCancel.setEnabled(false);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            if(selectedPath.length()>0){
+
+
+                if(checked) {
+                    onDirChanged();
+                    FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
+                }else{
+                    copyDefault();
+                    FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
+                }
+
+                PreferenceHelper.putBoolean(getActivity(), "restart", "restart", true);
+                Intent intent = new Intent("reboot");
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                getActivity().finish();
+                return true;
+            }else{
+
+                return false;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            mProgressBar.setVisibility(View.GONE);
+            txtMsg.setVisibility(View.GONE);
+            btnChange.setEnabled(true);
+            btnChangePath.setEnabled(true);
+            btnCancel.setEnabled(true);
+            if(!aBoolean){
+                Toast.makeText(getActivity(), "Please select path", Toast.LENGTH_SHORT).show();
+            }
+            super.onPostExecute(aBoolean);
+        }
     }
 }
