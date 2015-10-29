@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import common.utils.FileUtils;
+import common.utils.PreferenceHelper;
 import dialogs.DialogHelpers;
 import eu.chainfire.libsuperuser.Shell;
 
@@ -53,7 +54,7 @@ import tasks.CommandTask;
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private static OnInflationListener sInflateCallback;
-    private Switch sEnableServer;
+    private Switch sEnableServer,sEnableCrosswalk;
     private SharedPreferences preferences;
     private Context context;
     private static final String TAG = HomeFragment.class.getSimpleName();
@@ -132,6 +133,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         sEnableServer = (Switch) view.findViewById(R.id.sw_enable_server);
         sEnableServer.setEnabled(true);
         sEnableServer.setOnCheckedChangeListener(new ServerListener());
+        sEnableCrosswalk=(Switch)view.findViewById(R.id.sw_enable_crosswalk);
+        sEnableCrosswalk.setChecked(PreferenceHelper.getBoolean(getActivity(),"crosswalk","crosswalk"));
+        sEnableCrosswalk.setOnCheckedChangeListener(onCheckedChangeListener);
         view.findViewById(R.id.ll_mysql_shell).setOnClickListener(this);
         view.findViewById(R.id.ll_package).setOnClickListener(this);
         view.findViewById(R.id.ll_vhost).setOnClickListener(this);
@@ -169,24 +173,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    private String getPathToRootDir(){
-        try {
-            List<String>  lines= org.apache.commons.io.FileUtils.readLines(new File(pathToConfig),"UTF-8");
-            for(String line : lines){
-
-                if(line.startsWith("server.document-root")){
-                    Log.e(TAG, line);
-                    int startIndex = line.indexOf("\"");
-                    String path = line.substring(startIndex + 1, line.length() - 1);
-                    return path;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 
 
@@ -200,6 +186,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             return null;
         }
     }
+
+    private CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            PreferenceHelper.putBoolean(getActivity(),"crosswalk","crosswalk",isChecked);
+            Intent intent = new Intent("crosswalk");
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        }
+    };
 
     protected class ServerListener implements CompoundButton.OnCheckedChangeListener {
         @Override

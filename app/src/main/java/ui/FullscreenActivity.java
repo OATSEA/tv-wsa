@@ -22,6 +22,11 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -76,17 +81,23 @@ public class FullscreenActivity extends AppCompatActivity {
     private LinearLayout layoutDirChooser;
     private AppCompatButton btnGo,btnChangePath,btnRetry;
     private AppCompatTextView txtDefaultPath , txtSelectedPath,txtInstalledPath,txtTitle;
+    private WebView webView;
     private String selectedPath = "";
     private boolean trackTimer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
-        hideSystemUI();
+       // hideSystemUI();
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("stop"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("crosswalk"));
 
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(this);
@@ -111,6 +122,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
         countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
         xWalkWebView = (XWalkView) findViewById(R.id.xwalkWebView);
+        webView = (WebView)findViewById(R.id.webView);
+
 
        installAndCheckRepo();
 
@@ -216,10 +229,12 @@ public class FullscreenActivity extends AppCompatActivity {
                     if (FileUtils.ensureLighttpdConfigExists()) {
                         File rootWebDir = new File(FileUtils.getPathToRootDir());
                         if(rootWebDir.exists()){
+                            layoutDirChooser.setVisibility(View.GONE);
                             xWalkWebView.setVisibility(View.VISIBLE);
                             configServer();
                         }else{
                             txtInstalledPath.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                            Toast.makeText(FullscreenActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -240,10 +255,10 @@ public class FullscreenActivity extends AppCompatActivity {
             FileUtils.setServerRootDir(FullscreenActivity.this,mFile);
             executeSu();
         }else{
-            if(!mFile.getPath().equals(FileUtils.getPathToRootDir())){
-                FileUtils.setServerRootDir(FullscreenActivity.this,mFile);
+            if (!mFile.getPath().equals(FileUtils.getPathToRootDir())){
+                FileUtils.setServerRootDir(FullscreenActivity.this, mFile);
                executeSu();
-            }else{
+            } else{
                executeSu();
             }
 
@@ -260,7 +275,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 selectedPath = data.getStringExtra("path");
                 txtSelectedPath.setText(selectedPath);
                 mSelectedRadio.setChecked(true);
-            }else if(resultCode == RESULT_CANCELED){
+            } else if (resultCode == RESULT_CANCELED){
                 mDefaultRadio.setChecked(true);
             }
         }
@@ -304,8 +319,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
 
 
-    @Override
+  /*  @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
 
             getWindow().getDecorView().setSystemUiVisibility(
@@ -316,8 +332,8 @@ public class FullscreenActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
-        super.onWindowFocusChanged(hasFocus);
-    }
+
+    }*/
 
     @Override
     protected void onPause() {
@@ -349,13 +365,13 @@ public class FullscreenActivity extends AppCompatActivity {
             xWalkWebView.onShow();
         }
         // Hide Everything:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             View rootView = getWindow().getDecorView();
             rootView.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
             rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
             rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        }
+        }*/
 
 
 
@@ -433,10 +449,24 @@ public class FullscreenActivity extends AppCompatActivity {
 
 
     private void openPage(String url) {
-        xWalkWebView.load(url, null);
 
-        // turn on debugging
-        XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
+        if(PreferenceHelper.getBoolean(FullscreenActivity.this,"crosswalk","crosswalk")) {
+            xWalkWebView.setVisibility(View.VISIBLE);
+            xWalkWebView.load(url, null);
+            webView.stopLoading();
+            webView.setVisibility(View.GONE);
+            XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
+            Toast.makeText(FullscreenActivity.this,"Crosswalk",Toast.LENGTH_SHORT).show();
+        }else{
+            webView.setVisibility(View.VISIBLE);
+            webView.setWebChromeClient(new WebChromeClient());
+            webView.setWebViewClient(new WebViewClient());
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadUrl(url);
+            xWalkWebView.stopLoading();
+            xWalkWebView.setVisibility(View.GONE);
+            Toast.makeText(FullscreenActivity.this,"WebView",Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -512,11 +542,21 @@ public class FullscreenActivity extends AppCompatActivity {
                             mDefaultRadio.setVisibility(View.GONE);
                             txtDefaultPath.setVisibility(View.GONE);
                         }else{
-                            xWalkWebView.setVisibility(View.VISIBLE);
+                            if(PreferenceHelper.getBoolean(FullscreenActivity.this,"crosswalk","crosswalk")){
+                                xWalkWebView.setVisibility(View.VISIBLE);
+                                webView.setVisibility(View.GONE);
+                                webView.stopLoading();
+                            }else{
+                                webView.setVisibility(View.VISIBLE);
+                                xWalkWebView.setVisibility(View.GONE);
+                                xWalkWebView.stopLoading();
+                            }
+
                             configServer();
                         }
                     }else{
-                        xWalkWebView.setVisibility(View.INVISIBLE);
+                        xWalkWebView.setVisibility(View.GONE);
+                        webView.setVisibility(View.GONE);
                         layoutDirChooser.setVisibility(View.VISIBLE);
                         txtInstalledPath.setVisibility(View.GONE);
                         btnRetry.setVisibility(View.GONE);
@@ -744,13 +784,20 @@ public class FullscreenActivity extends AppCompatActivity {
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            disableServer();
-            if(intent.getAction().equals("stop")){
 
+            if(intent.getAction().equals("stop")){
+                disableServer();
                 finish();
             }else if(intent.getAction().equals("reboot")){
-
+                disableServer();
                 executeSu();
+            }else if(intent.getAction().equals("crosswalk")){
+                if(FileUtils.isInstalled()){
+                    openPage(play_url);
+                }else{
+                    openPage(getinfected_url);
+                }
+
             }
 
         }

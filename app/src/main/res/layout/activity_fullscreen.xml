@@ -8,12 +8,21 @@
         android:id="@+id/xwalkWebView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:visibility="gone"
         android:orientation="vertical" />
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/webView"
+        android:visibility="gone"
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/layout.config"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
         android:orientation="vertical"
         android:paddingBottom="16dp"
         android:paddingLeft="16dp"
@@ -119,5 +128,7 @@
             android:inputType="text"
             android:text="Go" />
     </LinearLayout>
+
+
 
 </FrameLayout>
