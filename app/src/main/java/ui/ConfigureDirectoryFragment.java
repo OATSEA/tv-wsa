@@ -2,13 +2,11 @@ package ui;
 
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
@@ -18,7 +16,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import org.teachervirus.FilePickerActivity;
@@ -32,7 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import common.utils.FileUtils;
-import common.utils.PreferenceHelper;
+import utils.AppSettings;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -118,10 +115,6 @@ public class ConfigureDirectoryFragment extends Fragment {
 
     private void onDirChanged(){
 
-        if(selectedPath.equals("/mnt/sdcard/")){
-            selectedPath = "/mnt/sdcard/TeacherVirus";
-        }
-
 
         try {
             copyDirectoryOneLocationToAnotherLocation(new File(FileUtils.getPathToRootDir())
@@ -134,10 +127,7 @@ public class ConfigureDirectoryFragment extends Fragment {
 
     private void copyDefault(){
         String path = FileUtils.getPathToRootDir();
-        if(path.equals("/mnt/sdcard/htdocs")){
-            path = "/mnt/sdcard/TeacheVirus";
 
-        }
         if(selectedPath.equals("")){
             selectedPath = path;
         }
@@ -185,7 +175,8 @@ public class ConfigureDirectoryFragment extends Fragment {
                         new File(destinationFolder, children[i]));
             }
         } else {
-
+            sourceFolder.setReadable(true,false);
+            destinationFolder.setReadable(true,false);
             InputStream in = new FileInputStream(sourceFolder);
             OutputStream out = new FileOutputStream(destinationFolder);
             // Copy the bits from instream to outstream
@@ -256,13 +247,14 @@ public class ConfigureDirectoryFragment extends Fragment {
 
                 if(checked) {
                     onDirChanged();
-                    FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
+                    AppSettings.updateInstallationDirectory(getActivity(), selectedPath);
                 }else{
                     copyDefault();
-                    FileUtils.setServerRootDir(getActivity(),new File(selectedPath));
+                    AppSettings.updateInstallationDirectory(getActivity(), selectedPath);
                 }
 
-                PreferenceHelper.putBoolean(getActivity(), "restart", "restart", true);
+
+
                 Intent intent = new Intent("reboot");
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 getActivity().finish();

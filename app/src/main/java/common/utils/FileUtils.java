@@ -40,6 +40,18 @@ public class FileUtils {
     }
 
 
+
+    public static  boolean isGetInfectedExists() {
+        File file = new File(FileUtils.getPathToRootDir() + File.separator + "getinfected.php");
+        return file.exists();
+    }
+
+    public static  boolean isLoadingSpinnerExists() {
+        File file = new File(FileUtils.getPathToRootDir() + File.separator + "loading_spinner.gif");
+        return file.exists();
+    }
+
+
     public static String getIpAddress(){
         String ipAddress = "http://localhost:8080";
         try{
@@ -177,13 +189,11 @@ public class FileUtils {
 
 
         String content = null;
-
         try {
             content = org.apache.commons.io.FileUtils.readFileToString(new File(pathToConfig), "UTF-8");
             content = content.replaceAll(getPathToRootDir(), mServerRootDir.getPath());
             File tempFile = new File(pathToConfig);
             org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, "UTF-8");
-            PreferenceHelper.putString(context,"dir","dir",mServerRootDir.getPath());
         } catch (IOException e) {
             //Simple exception handling, replace with what's necessary for your use case!
             throw new RuntimeException("Generating file failed", e);

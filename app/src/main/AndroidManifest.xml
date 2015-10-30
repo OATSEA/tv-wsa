@@ -56,11 +56,6 @@
             android:launchMode="singleTop"
             android:theme="@style/FullScreen"
             android:windowSoftInputMode="adjustResize" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <receiver android:name="services.HotSpotReceiver" >
@@ -70,6 +65,45 @@
         </receiver>
 
         <activity android:name=".FilePickerActivity" >
+        </activity>
+        <activity
+            android:name=".LauncherActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreen"
+            android:windowSoftInputMode="adjustResize" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ChooseInstallationActivity"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTop"
+                  android:theme="@style/FullScreen"
+                  android:windowSoftInputMode="adjustResize"
+            >
+        </activity>
+        <activity android:name=".CrosswalkActivity"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTop"
+                  android:theme="@style/FullScreen"
+                  android:windowSoftInputMode="adjustResize"
+            >
+        </activity>
+        <activity android:name=".InstallationDeleteActivity" >
+        </activity>
+        <activity android:name=".WebActivity"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTop"
+                  android:theme="@style/FullScreen"
+                  android:windowSoftInputMode="adjustResize"
+            >
         </activity>
     </application>
 

@@ -2,13 +2,9 @@ package ui;
 
 import android.app.Activity;
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,39 +12,26 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-
-
-
 import org.teachervirus.Constants;
 import org.teachervirus.R;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import common.utils.FileUtils;
-import common.utils.PreferenceHelper;
 import dialogs.DialogHelpers;
 import eu.chainfire.libsuperuser.Shell;
-
 import listeners.OnInflationListener;
 import services.ServerService;
 import tasks.CommandTask;
+import utils.AppSettings;
 
 @android.annotation.TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -134,7 +117,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         sEnableServer.setEnabled(true);
         sEnableServer.setOnCheckedChangeListener(new ServerListener());
         sEnableCrosswalk=(Switch)view.findViewById(R.id.sw_enable_crosswalk);
-        sEnableCrosswalk.setChecked(PreferenceHelper.getBoolean(getActivity(),"crosswalk","crosswalk"));
+        sEnableCrosswalk.setChecked(AppSettings.crosswalkEnabled(getActivity()));
         sEnableCrosswalk.setOnCheckedChangeListener(onCheckedChangeListener);
         view.findViewById(R.id.ll_mysql_shell).setOnClickListener(this);
         view.findViewById(R.id.ll_package).setOnClickListener(this);
@@ -191,7 +174,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-            PreferenceHelper.putBoolean(getActivity(),"crosswalk","crosswalk",isChecked);
+            AppSettings.setCrosswalkEnable(getActivity(),isChecked);
             Intent intent = new Intent("crosswalk");
             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
         }

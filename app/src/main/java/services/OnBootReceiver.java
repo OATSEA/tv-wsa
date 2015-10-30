@@ -6,21 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 
 import common.utils.FileUtils;
-import common.utils.PreferenceHelper;
+import common.utils.PrefUtil;
 import tasks.CommandTask;
-import utils.Utils;
 
 public class OnBootReceiver extends BroadcastReceiver {
 
@@ -31,7 +21,7 @@ public class OnBootReceiver extends BroadcastReceiver {
     	
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 
-            PreferenceHelper.putBoolean(context,"restart","restart",false);
+            PrefUtil.putBoolean(context, "restart", "restart", false);
             FileUtils.writeIpAddress("http://"+"localhost:8080");
         	final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (preferences.getBoolean("enable_server_on_boot", false)) {

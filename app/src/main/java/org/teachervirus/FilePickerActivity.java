@@ -1,12 +1,11 @@
 package org.teachervirus;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -135,7 +134,9 @@ public class FilePickerActivity extends AppCompatActivity {
 
                         File storageDir = new File(sSelectedPath);
                         sSelectedPath = storageDir.getAbsolutePath();
-                        sSelectedPath += "/TeacherVirus";
+                        if(!sSelectedPath.endsWith("TeacherVirus")) {
+                            sSelectedPath += "/TeacherVirus";
+                        }
 
                         if (storageDir.isDirectory()) {
                             Intent intent = new Intent();

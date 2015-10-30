@@ -47,7 +47,7 @@ import java.net.URL;
 import java.util.List;
 
 import common.utils.FileUtils;
-import common.utils.PreferenceHelper;
+import common.utils.PrefUtil;
 import eu.chainfire.libsuperuser.Shell;
 import services.ServerService;
 import tasks.CommandTask;
@@ -247,7 +247,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         disableServer();
 
-        PreferenceHelper.putBoolean(FullscreenActivity.this,"restart","restart",true);
+        PrefUtil.putBoolean(FullscreenActivity.this, "restart", "restart", true);
         File mFile = new File(dir);
         if(!mFile.exists()){
             mFile.mkdirs();
@@ -291,7 +291,7 @@ public class FullscreenActivity extends AppCompatActivity {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PreferenceHelper.putBoolean(FullscreenActivity.this, "restart", "restart", true);
+                PrefUtil.putBoolean(FullscreenActivity.this, "restart", "restart", true);
                 disableServer();
                 dialog.dismiss();
                 finish();
@@ -467,7 +467,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         String mainurl = "http://localhost:8080"+url;
         Log.e(TAG,"current url : "+mainurl);
-        if(PreferenceHelper.getBoolean(FullscreenActivity.this,"crosswalk","crosswalk")) {
+        if(PrefUtil.getBoolean(FullscreenActivity.this, "crosswalk", "crosswalk")) {
             xWalkWebView.setVisibility(View.VISIBLE);
             if (xWalkWebView != null) {
                 xWalkWebView.resumeTimers();
@@ -551,7 +551,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
                 if (FileUtils.ensureLighttpdConfigExists()) {
                     File rootWebDir = new File(FileUtils.getPathToRootDir());
-                    String savedPath = PreferenceHelper.getString(FullscreenActivity.this,"dir","dir");
+                    String savedPath = PrefUtil.getString(FullscreenActivity.this, "dir", "dir");
                     if(savedPath != null && !savedPath.trim().isEmpty() && savedPath.equals(FileUtils.getPathToRootDir())){
                         if(!rootWebDir.exists()){
                             xWalkWebView.setVisibility(View.INVISIBLE);
@@ -563,7 +563,7 @@ public class FullscreenActivity extends AppCompatActivity {
                             mDefaultRadio.setVisibility(View.GONE);
                             txtDefaultPath.setVisibility(View.GONE);
                         }else{
-                            if(PreferenceHelper.getBoolean(FullscreenActivity.this,"crosswalk","crosswalk")){
+                            if(PrefUtil.getBoolean(FullscreenActivity.this, "crosswalk", "crosswalk")){
                                 xWalkWebView.setVisibility(View.VISIBLE);
                                 webView.setVisibility(View.GONE);
                                 webView.stopLoading();
@@ -666,7 +666,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
                             }
                         });
-                        PreferenceHelper.putBoolean(FullscreenActivity.this,"restart","restart",false);
+                        PrefUtil.putBoolean(FullscreenActivity.this, "restart", "restart", false);
                     }
                 }
             }).start();
@@ -696,14 +696,14 @@ public class FullscreenActivity extends AppCompatActivity {
 
                             }
                         });
-                        PreferenceHelper.putBoolean(FullscreenActivity.this, "restart", "restart", false);
+                        PrefUtil.putBoolean(FullscreenActivity.this, "restart", "restart", false);
                     } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
 
                                 try {
-                                    if (PreferenceHelper.getBoolean(FullscreenActivity.this, "restart", "restart")) {
+                                    if (PrefUtil.getBoolean(FullscreenActivity.this, "restart", "restart")) {
                                         askToRestart();
                                     } else {
                                         unknownError();

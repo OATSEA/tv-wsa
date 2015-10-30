@@ -121,6 +121,16 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="choose_installation_path">Choose installation path</string>
+    <string name="default_path">Default Path</string>
+    <string name="select_path">Select Path</string>
+    <string name="change_path">Change Path</string>
+    <string name="go">Go</string>
+    <string name="retry">Retry</string>
+    <string name="previous_installation_found">Previous installation found</string>
+    <string name="delete_continue"><![CDATA[Delete & Continue]]></string>
+    <string name="keep_existing"><![CDATA[Keep existing & Continue]]></string>
+    <string name="please_check_media">Please check media or retry</string>
 
 
 </resources>
