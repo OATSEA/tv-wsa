@@ -40,6 +40,22 @@ public class FileUtils {
     }
 
 
+    public static String getIpAddress(){
+        String ipAddress = "http://localhost:8080";
+        try{
+            List<String> lines = org.apache.commons.io.FileUtils.readLines(new File(getPathToRootDir(),"IP.txt"),"UTF-8");
+            for(String line : lines){
+                if(line.startsWith("http")){
+                    ipAddress = line;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            ipAddress = "http://localhost:8080";
+        }
+
+        return ipAddress;
+    }
 
     public static  String getPathToRootDir(){
         try {

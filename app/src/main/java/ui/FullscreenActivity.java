@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -30,12 +29,12 @@ import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import org.teachervirus.Constants;
 import org.teachervirus.FilePickerActivity;
 import org.teachervirus.R;
+import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkPreferences;
 import org.xwalk.core.XWalkView;
 
@@ -72,8 +71,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final int DEFAULT_COUNTDOWN_TIME = 60 * 1000; // one minute
     private static final int DEFAULT_INTERVAL = 5000; // 5 second
     private static String file_url = "https://www.github.com/OATSEA/getinfected/zipball/master";  // File url to download - github
-    private static String getinfected_url = "http://localhost:8080/getinfected.php"; // getinfected installer
-    private static String play_url = "http://localhost:8080/play";
+    private static String getinfected_url = "/getinfected.php"; // getinfected installer
+    private static String play_url = "/play";
 
     private SharedPreferences preferences;
     private CountDownTimer countDownTimer;
@@ -431,8 +430,24 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        countDownTimer.cancel();
-        super.onBackPressed();
+        if(xWalkWebView.getVisibility() == View.VISIBLE){
+            if(xWalkWebView.getNavigationHistory().canGoBack()){
+                xWalkWebView.getNavigationHistory().navigate(XWalkNavigationHistory.Direction.BACKWARD,1);
+            }else{
+                countDownTimer.cancel();
+                super.onBackPressed();
+            }
+        }else if(webView.getVisibility()==View.VISIBLE){
+            if(webView.canGoBack()){
+                webView.goBack();
+            }else{
+                countDownTimer.cancel();
+                super.onBackPressed();
+            }
+        }else{
+            super.onBackPressed();
+        }
+
     } // END onBackPressed
 
 
@@ -450,9 +465,15 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void openPage(String url) {
 
+        String mainurl = "http://localhost:8080"+url;
+        Log.e(TAG,"current url : "+mainurl);
         if(PreferenceHelper.getBoolean(FullscreenActivity.this,"crosswalk","crosswalk")) {
             xWalkWebView.setVisibility(View.VISIBLE);
-            xWalkWebView.load(url, null);
+            if (xWalkWebView != null) {
+                xWalkWebView.resumeTimers();
+                xWalkWebView.onShow();
+            }
+            xWalkWebView.load(mainurl, null);
             webView.stopLoading();
             webView.setVisibility(View.GONE);
             XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
@@ -462,9 +483,9 @@ public class FullscreenActivity extends AppCompatActivity {
             webView.setWebChromeClient(new WebChromeClient());
             webView.setWebViewClient(new WebViewClient());
             webView.getSettings().setJavaScriptEnabled(true);
-            webView.loadUrl(url);
+            webView.loadUrl(mainurl);
             xWalkWebView.stopLoading();
-            xWalkWebView.setVisibility(View.GONE);
+            xWalkWebView.setVisibility(View.INVISIBLE);
             Toast.makeText(FullscreenActivity.this,"WebView",Toast.LENGTH_SHORT).show();
         }
     }
@@ -495,7 +516,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private boolean serverWorking() {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(getinfected_url).openConnection();
+            connection = (HttpURLConnection) new URL(FileUtils.getIpAddress()+getinfected_url).openConnection();
             connection.setRequestMethod("HEAD");
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
@@ -548,14 +569,14 @@ public class FullscreenActivity extends AppCompatActivity {
                                 webView.stopLoading();
                             }else{
                                 webView.setVisibility(View.VISIBLE);
-                                xWalkWebView.setVisibility(View.GONE);
+                                xWalkWebView.setVisibility(View.INVISIBLE);
                                 xWalkWebView.stopLoading();
                             }
-
+                            layoutDirChooser.setVisibility(View.GONE);
                             configServer();
                         }
                     }else{
-                        xWalkWebView.setVisibility(View.GONE);
+                        xWalkWebView.setVisibility(View.INVISIBLE);
                         webView.setVisibility(View.GONE);
                         layoutDirChooser.setVisibility(View.VISIBLE);
                         txtInstalledPath.setVisibility(View.GONE);
