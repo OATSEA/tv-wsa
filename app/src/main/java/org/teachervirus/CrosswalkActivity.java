@@ -424,9 +424,6 @@ public class CrosswalkActivity extends Activity {
             if(!AppSettings.getRootDir(CrosswalkActivity.this).exists()){
                 serverRunning = false;
                 openCheckMedia();
-            }else{
-                Log.e(TAG,"configure server");
-                configServer();
             }
         }
     }
@@ -465,9 +462,6 @@ public class CrosswalkActivity extends Activity {
             if (!AppSettings.getRootDir(CrosswalkActivity.this).exists()) {
                 serverRunning = false;
                 openCheckMedia();
-            } else {
-                Log.e(TAG, "configure server");
-                configServer();
             }
         }
         super.onRestoreInstanceState(savedInstanceState);

@@ -424,9 +424,6 @@ public class WebActivity extends AppCompatActivity {
             if(!AppSettings.getRootDir(WebActivity.this).exists()){
                 serverRunning = false;
                 openCheckMedia();
-            }else{
-                Log.e(TAG,"configure server");
-                configServer();
             }
         }
 
@@ -463,9 +460,6 @@ public class WebActivity extends AppCompatActivity {
             if(!AppSettings.getRootDir(WebActivity.this).exists()){
                 serverRunning = false;
                 openCheckMedia();
-            }else{
-                Log.e(TAG,"configure server");
-                configServer();
             }
         }
         super.onRestoreInstanceState(savedInstanceState);
