@@ -56,7 +56,7 @@ public class ChooseInstallationActivity extends AppCompatActivity {
                 case R.id.btnGO:
                     if(mDefaultPathRadio.isChecked()){
 
-                        onDirectorySelected(AppSettings.getDefaultInstallationPath(ChooseInstallationActivity.this));
+                        onDirectorySelected(AppSettings.getRootDirPath(ChooseInstallationActivity.this));
                     }else{
                         if(selectedPath.length()>0){
                             onDirectorySelected(selectedPath);
@@ -73,7 +73,7 @@ public class ChooseInstallationActivity extends AppCompatActivity {
                 case R.id.btnRetry:
                     if(FileUtils.ensureLighttpdConfigExists()){
                         if(AppSettings.getRootDir(ChooseInstallationActivity.this).exists()){
-                            onDirectorySelected(AppSettings.getDefaultInstallationPath(ChooseInstallationActivity.this));
+                            onDirectorySelected(AppSettings.getRootDirPath(ChooseInstallationActivity.this));
                         }else{
                             txtMsg.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
                             Toast.makeText(ChooseInstallationActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
@@ -120,21 +120,21 @@ public class ChooseInstallationActivity extends AppCompatActivity {
         if(!file.exists()){
             file.mkdirs();
         }
+        AppSettings.updateRootDirPath(ChooseInstallationActivity.this,path);
         Intent intent = new Intent();
-        intent.putExtra("path",path);
         setResult(RESULT_OK, intent);
         finish();
     }
 
     private void setup(boolean retry){
         if(retry){
-            txtTitle.setText(AppSettings.getDefaultInstallationPath(ChooseInstallationActivity.this)+" not found.");
+            txtTitle.setText(AppSettings.getRootDirPath(ChooseInstallationActivity.this)+" not found.");
             txtMsg.setVisibility(View.VISIBLE);
             btnRetry.setVisibility(View.VISIBLE);
             txtDefaultPath.setVisibility(View.GONE);
             mDefaultPathRadio.setVisibility(View.GONE);
         }else{
-            txtDefaultPath.setText(AppSettings.getDefaultInstallationPath(ChooseInstallationActivity.this));
+            txtDefaultPath.setText(AppSettings.getRootDirPath(ChooseInstallationActivity.this));
         }
     }
 
@@ -152,6 +152,17 @@ public class ChooseInstallationActivity extends AppCompatActivity {
         setup(getIntent().getBooleanExtra("retry",false));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        boolean retry = getIntent().getBooleanExtra("retry",false);
+        if(retry && AppSettings.getRootDir(ChooseInstallationActivity.this).exists()){
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

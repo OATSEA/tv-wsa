@@ -49,6 +49,7 @@ public class WebActivity extends AppCompatActivity {
     private CountDownTimer countDownTimer;
     private ProgressDialog pDialog;
     private boolean trackTimer = false;
+    private boolean serverRunning = false;
 
     private void initialise() {
 
@@ -97,12 +98,8 @@ public class WebActivity extends AppCompatActivity {
 
                 if (FileUtils.ensureLighttpdConfigExists()) {
 
-                    String path  = getIntent().getStringExtra("path");
-                    if(!path.equals(AppSettings.getDefaultInstallationPath(WebActivity.this))){
-                        Log.e(TAG, "Path from intent : " + path);
-                        AppSettings.updateInstallationDirectory(WebActivity.this, path);
-                        Log.e(TAG, "path from config : " + FileUtils.getPathToRootDir());
-                    }
+
+                    AppSettings.updateRootDirPath(WebActivity.this, AppSettings.getRootDirPath(WebActivity.this));
 
                     if(!AppSettings.getRootDir(WebActivity.this).exists()){
                         openCheckMedia();
@@ -218,7 +215,7 @@ public class WebActivity extends AppCompatActivity {
         @Override
         public void onTick(long millisUntilFinished) {
 
-            Log.e(TAG,"on tick");
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -328,6 +325,7 @@ public class WebActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl(mainurl);
         Log.e(TAG, "Webview");
+        serverRunning = true;
     }
 
     private void askToRestart(){
@@ -407,7 +405,7 @@ public class WebActivity extends AppCompatActivity {
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(this);
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("reboot"));
+                new IntentFilter("dirchange"));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("stop"));
@@ -421,6 +419,16 @@ public class WebActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if(serverRunning){
+            if(!AppSettings.getRootDir(WebActivity.this).exists()){
+                serverRunning = false;
+                openCheckMedia();
+            }else{
+                Log.e(TAG,"configure server");
+                configServer();
+            }
+        }
 
     }
 
@@ -439,6 +447,7 @@ public class WebActivity extends AppCompatActivity {
         }else{
             outState.putBoolean("track", false);
         }
+        outState.putBoolean("server",serverRunning);
         super.onSaveInstanceState(outState);
     }
 
@@ -449,8 +458,19 @@ public class WebActivity extends AppCompatActivity {
         if(!trackTimer && state){
             unknownError();
         }
+        serverRunning = savedInstanceState.getBoolean("server");
+        if(serverRunning){
+            if(!AppSettings.getRootDir(WebActivity.this).exists()){
+                serverRunning = false;
+                openCheckMedia();
+            }else{
+                Log.e(TAG,"configure server");
+                configServer();
+            }
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
+
 
     @Override
     protected void onDestroy() {
@@ -464,9 +484,9 @@ public class WebActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if(intent.getAction().equals("reboot")){
-
-                finish();
+            if(intent.getAction().equals("dirchange")){
+                Log.e(TAG,"Dir changed  execute su again");
+                executeSu();
             }else if(intent.getAction().equals("crosswalk")){
 
                 finish();

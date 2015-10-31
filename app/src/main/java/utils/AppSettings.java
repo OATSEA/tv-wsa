@@ -1,6 +1,7 @@
 package utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.teachervirus.BuildConfig;
 
@@ -13,6 +14,7 @@ import common.utils.PrefUtil;
  * Created by warlock on 30-10-2015.
  */
 public class AppSettings {
+    private static final String TAG = AppSettings.class.getSimpleName();
 
     public static final String KEY_SETTINGS = "Settings";
     public static final String KEY_VERSION_NAME = "version_name";
@@ -24,7 +26,7 @@ public class AppSettings {
     public static final String PLAY_URL = "/play";
     public static final String GETINFECTED_URL = "/getinfected.php";
 
-    public static String getDefaultInstallationPath(Context context){
+    public static String getRootDirPath(Context context){
         String defaultDir = INSTALLATION_DEFAULT_DIR;
         String pathFromPrefs = PrefUtil.getString(context,KEY_SETTINGS,KEY_INSTALLATION_DIR);
 
@@ -33,6 +35,7 @@ public class AppSettings {
         }else if(!pathFromPrefs.equals("")){
             defaultDir = pathFromPrefs;
         }
+        Log.e(TAG,"currentRootPath : "+defaultDir);
         return defaultDir;
     }
 
@@ -74,7 +77,7 @@ public class AppSettings {
 
     //get root directory
     public static File getRootDir(Context context){
-        return new File(getDefaultInstallationPath(context));
+        return new File(getRootDirPath(context));
     }
 
     public static void deletePreviousInstallation(Context context){
@@ -96,7 +99,8 @@ public class AppSettings {
     }
 
     //update installation directoryPath()
-    public static void updateInstallationDirectory(Context context,String path){
+    public static void updateRootDirPath(Context context, String path){
+        Log.e(TAG,"updatedPath : "+path);
         PrefUtil.putString(context,KEY_SETTINGS,KEY_INSTALLATION_DIR,path);
         FileUtils.setServerRootDir(context, new File(path));
     }

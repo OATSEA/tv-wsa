@@ -49,6 +49,7 @@ public class CrosswalkActivity extends Activity {
     private CountDownTimer countDownTimer;
     private ProgressDialog pDialog;
     private boolean trackTimer = false;
+    private boolean serverRunning = false;
 
     private void initialise() {
 
@@ -97,19 +98,16 @@ public class CrosswalkActivity extends Activity {
 
                 if (FileUtils.ensureLighttpdConfigExists()) {
 
-                    String path  = getIntent().getStringExtra("path");
-                    if(!path.equals(AppSettings.getDefaultInstallationPath(CrosswalkActivity.this))){
-                        Log.e(TAG, "Path from intent : " + path);
-                        AppSettings.updateInstallationDirectory(CrosswalkActivity.this, path);
-                        Log.e(TAG, "path from config : " + FileUtils.getPathToRootDir());
-                    }
 
-                        if(!AppSettings.getRootDir(CrosswalkActivity.this).exists()){
-                            openCheckMedia();
-                        }else{
-                            Log.e(TAG,"configure server");
-                            configServer();
-                        }
+                    AppSettings.updateRootDirPath(CrosswalkActivity.this, AppSettings.getRootDirPath(CrosswalkActivity.this));
+
+
+                    if (!AppSettings.getRootDir(CrosswalkActivity.this).exists()) {
+                        openCheckMedia();
+                    } else {
+                        Log.e(TAG, "configure server");
+                        configServer();
+                    }
 
                 }
             }
@@ -117,24 +115,24 @@ public class CrosswalkActivity extends Activity {
         task.execute();
     }
 
-    private void configServer(){
+    private void configServer() {
         showDialog();
         String ipAddress = Utils.getIPAddress(true);
         if (ipAddress.trim().isEmpty()) {
             FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
         } else {
-            FileUtils. writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
+            FileUtils.writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
         }
-        if(!FileUtils.isGetInfectedExists() || ! FileUtils.isLoadingSpinnerExists()){
+        if (!FileUtils.isGetInfectedExists() || !FileUtils.isLoadingSpinnerExists()) {
             FileUtils.copyAssets(CrosswalkActivity.this);
         }
         countDownTimer.start();
         trackTimer = true;
     }
 
-    private void openCheckMedia(){
+    private void openCheckMedia() {
         Intent intent = new Intent();
-        intent.putExtra("retry",true);
+        intent.putExtra("retry", true);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -152,6 +150,7 @@ public class CrosswalkActivity extends Activity {
         notify.cancel(143);
         stopService(new Intent(this, ServerService.class));
     }
+
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
 
 
@@ -205,9 +204,6 @@ public class CrosswalkActivity extends Activity {
     }
 
 
-
-
-
     public class MyTimer extends CountDownTimer {
 
 
@@ -218,7 +214,7 @@ public class CrosswalkActivity extends Activity {
         @Override
         public void onTick(long millisUntilFinished) {
 
-            Log.e(TAG,"on tick");
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -282,7 +278,7 @@ public class CrosswalkActivity extends Activity {
                                     } else {
                                         unknownError();
                                     }
-                                }catch (Exception e){
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
 
@@ -299,7 +295,7 @@ public class CrosswalkActivity extends Activity {
     private boolean serverWorking() {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(FileUtils.getIpAddress()+AppSettings.GETINFECTED_URL).openConnection();
+            connection = (HttpURLConnection) new URL(FileUtils.getIpAddress() + AppSettings.GETINFECTED_URL).openConnection();
             connection.setRequestMethod("HEAD");
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
@@ -321,13 +317,14 @@ public class CrosswalkActivity extends Activity {
 
     private void openPage(String url) {
 
-        String mainurl = "http://localhost:8080"+url;
-        Log.e(TAG,"current url : "+mainurl);
-       mXWalkView.load(mainurl, null);
-        Log.e(TAG,"crosswalk");
+        String mainurl = "http://localhost:8080" + url;
+        Log.e(TAG, "current url : " + mainurl);
+        mXWalkView.load(mainurl, null);
+        Log.e(TAG, "crosswalk");
+        serverRunning = true;
     }
 
-    private void askToRestart(){
+    private void askToRestart() {
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(CrosswalkActivity.this);
         builder.setTitle("Restart Device");
@@ -345,7 +342,7 @@ public class CrosswalkActivity extends Activity {
         builder.show();
     }
 
-    private void unknownError(){
+    private void unknownError() {
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(CrosswalkActivity.this);
         builder.setTitle("Restart Device");
@@ -379,7 +376,7 @@ public class CrosswalkActivity extends Activity {
                 pDialog.dismiss();
                 pDialog = null;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -404,7 +401,7 @@ public class CrosswalkActivity extends Activity {
         preferences = PreferenceManager.
                 getDefaultSharedPreferences(this);
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("reboot"));
+                new IntentFilter("dirchange"));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("stop"));
@@ -422,6 +419,16 @@ public class CrosswalkActivity extends Activity {
             mXWalkView.resumeTimers();
             mXWalkView.onShow();
         }
+
+        if(serverRunning){
+            if(!AppSettings.getRootDir(CrosswalkActivity.this).exists()){
+                serverRunning = false;
+                openCheckMedia();
+            }else{
+                Log.e(TAG,"configure server");
+                configServer();
+            }
+        }
     }
 
     @Override
@@ -437,11 +444,12 @@ public class CrosswalkActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if(trackTimer){
-            outState.putBoolean("track",true);
-        }else{
+        if (trackTimer) {
+            outState.putBoolean("track", true);
+        } else {
             outState.putBoolean("track", false);
         }
+        outState.putBoolean("server", serverRunning);
         super.onSaveInstanceState(outState);
     }
 
@@ -449,8 +457,18 @@ public class CrosswalkActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         boolean state = savedInstanceState.getBoolean("track");
-        if(!trackTimer && state){
+        if (!trackTimer && state) {
             unknownError();
+        }
+        serverRunning = savedInstanceState.getBoolean("server");
+        if (serverRunning) {
+            if (!AppSettings.getRootDir(CrosswalkActivity.this).exists()) {
+                serverRunning = false;
+                openCheckMedia();
+            } else {
+                Log.e(TAG, "configure server");
+                configServer();
+            }
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
@@ -470,13 +488,12 @@ public class CrosswalkActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if(intent.getAction().equals("reboot")){
+            if (intent.getAction().equals("dirchange")) {
+                executeSu();
+            } else if (intent.getAction().equals("crosswalk")) {
 
                 finish();
-            }else if(intent.getAction().equals("crosswalk")){
-
-                finish();
-            }else if(intent.getAction().equals("stop")){
+            } else if (intent.getAction().equals("stop")) {
                 disableServer();
                 finish();
             }

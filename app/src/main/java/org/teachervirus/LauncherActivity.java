@@ -12,9 +12,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import common.utils.FileUtils;
 import services.ServerService;
 import tasks.CommandTask;
 import utils.AppSettings;
+import utils.Utils;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -27,33 +29,39 @@ public class LauncherActivity extends AppCompatActivity {
 
     private void openInstallationPathChooser(boolean retry){
         Intent mIntent = new Intent(LauncherActivity.this,ChooseInstallationActivity.class);
+        mIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         mIntent.putExtra("retry",retry);
         startActivityForResult(mIntent,REQ_SELECT_INSTALL_PATH);
     }
 
 
-    private void openBrowser(String path){
+    private void openBrowser(){
         if(AppSettings.crosswalkEnabled(LauncherActivity.this)){
-            openCrosswalk(path);
+            openCrosswalk();
         }else{
-            openWebView(path);
+            openWebView();
         }
     }
 
-    private void openCrosswalk(String path){
+    private void openCrosswalk(){
         Intent intent = new Intent(LauncherActivity.this,CrosswalkActivity.class);
-        intent.putExtra("path",path);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_CROSS_WALK);
     }
 
-    private void openWebView(String path){
+    private void openWebView(){
         Intent intent = new Intent(LauncherActivity.this,WebActivity.class);
-        intent.putExtra("path",path);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_WEB_VIEW);
     }
 
     private void openDeleteAndInstall(){
         Intent intent = new Intent(LauncherActivity.this,InstallationDeleteActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_DELETE_OLD);
     }
 
@@ -87,6 +95,16 @@ public class LauncherActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("crosswalk"));
+
+        String ipAddress = Utils.getIPAddress(true);
+        if (ipAddress.trim().isEmpty()) {
+            FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
+        } else {
+            FileUtils.writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
+        }
+        if (!FileUtils.isGetInfectedExists() || !FileUtils.isLoadingSpinnerExists()) {
+            FileUtils.copyAssets(LauncherActivity.this);
+        }
         if(AppSettings.applicationUpdated(LauncherActivity.this)
                 && AppSettings.previousInstallationFound(LauncherActivity.this)){
             //App updated or freshly installed  && installation found.
@@ -95,7 +113,7 @@ public class LauncherActivity extends AppCompatActivity {
         }else{
             if(AppSettings.previousInstallationFound(LauncherActivity.this)){
                 Log.e(TAG,"run server related code");
-                openBrowser(AppSettings.getDefaultInstallationPath(LauncherActivity.this));
+                openBrowser();
             }else{
                 Log.e(TAG,"Ask for install location");
                 openInstallationPathChooser(false);
@@ -114,7 +132,7 @@ public class LauncherActivity extends AppCompatActivity {
 
             case REQ_SELECT_INSTALL_PATH:
                     if(resultCode == RESULT_OK){
-                        openBrowser(data.getStringExtra("path"));
+                        openBrowser();
                     }else{
                         finish();
                     }
@@ -125,7 +143,7 @@ public class LauncherActivity extends AppCompatActivity {
                     if(data.getBooleanExtra("deleted",false)){
                         openInstallationPathChooser(false);
                     }else{
-                        openBrowser(AppSettings.getDefaultInstallationPath(LauncherActivity.this));
+                        openBrowser();
                     }
                 }else{
                     finish();
@@ -177,10 +195,10 @@ public class LauncherActivity extends AppCompatActivity {
 
             if(intent.getAction().equals("reboot")){
 
-                openBrowser(AppSettings.getDefaultInstallationPath(LauncherActivity.this));
+                openBrowser();
             }else if(intent.getAction().equals("crosswalk")){
 
-                openBrowser(AppSettings.getDefaultInstallationPath(LauncherActivity.this));
+                openBrowser();
             }else if(intent.getAction().equals("stop")){
                 disableServer();
                 finish();

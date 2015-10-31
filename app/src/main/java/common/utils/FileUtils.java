@@ -196,7 +196,7 @@ public class FileUtils {
             org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, "UTF-8");
         } catch (IOException e) {
             //Simple exception handling, replace with what's necessary for your use case!
-            throw new RuntimeException("Generating file failed", e);
+            e.printStackTrace();
         }
     }
 }

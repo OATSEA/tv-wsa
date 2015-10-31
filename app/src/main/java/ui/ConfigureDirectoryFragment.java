@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import common.utils.FileUtils;
 import utils.AppSettings;
 
 /**
@@ -79,7 +78,7 @@ public class ConfigureDirectoryFragment extends Fragment {
         btnChangePath.setOnClickListener(mOnClickListener);
         btnCancel.setOnClickListener(mOnClickListener);
 
-        txtCurrentPath.setText("Current path : " + FileUtils.getPathToRootDir());
+        txtCurrentPath.setText("Current path : " + AppSettings.getRootDirPath(getActivity()));
 
         super.onViewCreated(view, savedInstanceState);
     }
@@ -117,7 +116,7 @@ public class ConfigureDirectoryFragment extends Fragment {
 
 
         try {
-            copyDirectoryOneLocationToAnotherLocation(new File(FileUtils.getPathToRootDir())
+            copyDirectoryOneLocationToAnotherLocation(AppSettings.getRootDir(getActivity())
             ,new File(selectedPath));
         } catch (IOException e) {
             e.printStackTrace();
@@ -126,7 +125,7 @@ public class ConfigureDirectoryFragment extends Fragment {
     }
 
     private void copyDefault(){
-        String path = FileUtils.getPathToRootDir();
+        String path = AppSettings.getRootDirPath(getActivity());
 
         if(selectedPath.equals("")){
             selectedPath = path;
@@ -247,15 +246,15 @@ public class ConfigureDirectoryFragment extends Fragment {
 
                 if(checked) {
                     onDirChanged();
-                    AppSettings.updateInstallationDirectory(getActivity(), selectedPath);
+                    AppSettings.updateRootDirPath(getActivity(), selectedPath);
                 }else{
                     copyDefault();
-                    AppSettings.updateInstallationDirectory(getActivity(), selectedPath);
+                    AppSettings.updateRootDirPath(getActivity(), selectedPath);
                 }
 
 
 
-                Intent intent = new Intent("reboot");
+                Intent intent = new Intent("dirchange");
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 getActivity().finish();
                 return true;
