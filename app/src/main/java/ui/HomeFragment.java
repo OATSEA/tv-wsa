@@ -20,6 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import org.teachervirus.Constants;
+import org.teachervirus.LauncherActivity;
 import org.teachervirus.R;
 
 import java.io.File;
@@ -136,10 +137,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             CommandTask task = CommandTask.createForUninstall(context);
             task.execute();
         } else if(view.getId() == R.id.ll_teacher_virus){
-            Intent fullScreenIntent = new Intent(getActivity(), FullscreenActivity.class);
-            fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            Intent fullScreenIntent = new Intent(getActivity(), LauncherActivity.class);
+
+            fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            /*fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);*/
             getActivity().startActivity(fullScreenIntent);
+            getActivity().finish();
         }else if(view.getId()== R.id.ll_exit){
             disableServer();
             Intent intent = new Intent("stop");

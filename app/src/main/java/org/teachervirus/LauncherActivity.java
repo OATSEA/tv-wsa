@@ -29,8 +29,10 @@ public class LauncherActivity extends AppCompatActivity {
 
     private void openInstallationPathChooser(boolean retry){
         Intent mIntent = new Intent(LauncherActivity.this,ChooseInstallationActivity.class);
-        mIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /*mIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
+
+        mIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         mIntent.putExtra("retry",retry);
         startActivityForResult(mIntent,REQ_SELECT_INSTALL_PATH);
     }
@@ -46,22 +48,28 @@ public class LauncherActivity extends AppCompatActivity {
 
     private void openCrosswalk(){
         Intent intent = new Intent(LauncherActivity.this,CrosswalkActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+       /* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_CROSS_WALK);
     }
 
     private void openWebView(){
         Intent intent = new Intent(LauncherActivity.this,WebActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+       /* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_WEB_VIEW);
     }
 
     private void openDeleteAndInstall(){
         Intent intent = new Intent(LauncherActivity.this,InstallationDeleteActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /*intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivityForResult(intent,REQ_DELETE_OLD);
     }
 
