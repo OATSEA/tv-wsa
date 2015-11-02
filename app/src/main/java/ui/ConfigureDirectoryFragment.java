@@ -2,9 +2,13 @@ package ui;
 
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.AppCompatButton;
@@ -28,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import services.ServerService;
+import tasks.CommandTask;
 import utils.AppSettings;
 
 /**
@@ -43,11 +49,18 @@ public class ConfigureDirectoryFragment extends Fragment {
     private String selectedPath="";
     private ProgressBar mProgressBar;
     private AppCompatTextView txtMsg;
+    private SharedPreferences preferences;
 
     public ConfigureDirectoryFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        preferences = PreferenceManager.
+                getDefaultSharedPreferences(getActivity());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -236,6 +249,7 @@ public class ConfigureDirectoryFragment extends Fragment {
             btnChange.setEnabled(false);
             btnChangePath.setEnabled(false);
             btnCancel.setEnabled(false);
+            disableServer();
         }
 
         @Override
@@ -278,4 +292,19 @@ public class ConfigureDirectoryFragment extends Fragment {
             super.onPostExecute(aBoolean);
         }
     }
+
+    private void disableServer() {
+        NotificationManager notify = (NotificationManager)
+                getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        getContext().stopService(new Intent(getActivity(), ServerService.class));
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForDisconnect(getActivity());
+        task.enableSU(enableSU);
+        task.execute();
+
+    }
+
 }

@@ -56,7 +56,7 @@ public class AppSettings {
         return file.exists();
     }
 
-    public static File getDefaultInstallFile(){
+    public static File getDefaultRootFile(){
         File file = new File(INSTALLATION_DEFAULT_DIR);
         return file;
     }
@@ -69,11 +69,6 @@ public class AppSettings {
         return file.exists();
     }
 
-    public static File getInstalledFile(Context context){
-        String dir = PrefUtil.getString(context,KEY_SETTINGS,INSTALLATION_DEFAULT_DIR);
-        File file = new File(dir);
-        return file;
-    }
 
     //get root directory
     public static File getRootDir(Context context){
@@ -82,15 +77,24 @@ public class AppSettings {
 
     public static void deletePreviousInstallation(Context context){
         if(droidPhpExists()){
-            getDroidPhpFile().delete();
+            deleteRecursive(getDroidPhpFile());
         }
         if(defaultInstallationDirExists()){
-            getDefaultInstallFile().delete();
+           deleteRecursive( getDefaultRootFile());
         }
 
-        if(installationDirExists(context)){
-            getInstalledFile(context).delete();
+        if(getRootDir(context).exists()){
+
+            deleteRecursive(getRootDir(context));
         }
+    }
+
+    public  static void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
     //update version name

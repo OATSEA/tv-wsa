@@ -130,8 +130,8 @@ public class WebActivity extends AppCompatActivity {
     }
 
     private void openCheckMedia(){
-        Intent intent = new Intent();
-        intent.putExtra("retry",true);
+        Intent intent = new Intent(WebActivity.this,LauncherActivity.class);
+        intent.putExtra("retry", true);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -302,6 +302,7 @@ public class WebActivity extends AppCompatActivity {
             if (responseCode != 200) {
                 return false;
             }
+
             return true;
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -318,14 +319,15 @@ public class WebActivity extends AppCompatActivity {
 
     private void openPage(String url) {
 
-        String mainurl = "http://localhost:8080"+url;
-        Log.e(TAG,"current url : "+mainurl);
+        String mainurl = "http://localhost:8080" + url;
+        Log.e(TAG, "current url : "+mainurl);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl(mainurl);
         Log.e(TAG, "Webview");
         serverRunning = true;
+
     }
 
     private void askToRestart(){
@@ -336,7 +338,7 @@ public class WebActivity extends AppCompatActivity {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PrefUtil.putBoolean(WebActivity.this, "restart", "restart", true);
+
                 disableServer();
                 dialog.dismiss();
                 finish();
@@ -412,6 +414,8 @@ public class WebActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("crosswalk"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("restart"));
         initialise();
         installAndCheckRepo();
     }
@@ -474,13 +478,16 @@ public class WebActivity extends AppCompatActivity {
 
 
 
+
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             if(intent.getAction().equals("dirchange")){
                 Log.e(TAG,"Dir changed  execute su again");
-                executeSu();
+                Intent minIntent1 = new Intent("open");
+                LocalBroadcastManager.getInstance(WebActivity.this).sendBroadcast(minIntent1);
+                finish();
             }else if(intent.getAction().equals("crosswalk")){
 
                 finish();

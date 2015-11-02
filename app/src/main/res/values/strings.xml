@@ -127,9 +127,9 @@
     <string name="change_path">Change Path</string>
     <string name="go">Go</string>
     <string name="retry">Retry</string>
-    <string name="previous_installation_found">Previous installation found</string>
-    <string name="delete_continue"><![CDATA[Delete & Continue]]></string>
-    <string name="keep_existing"><![CDATA[Keep existing & Continue]]></string>
+    <string name="previous_installation_found">Previous Installation Found</string>
+    <string name="delete_continue"><![CDATA[Remove previous installation?]]></string>
+    <string name="keep_existing"><![CDATA[Keep existing?]]></string>
     <string name="please_check_media">Please check media or retry</string>
 
 

@@ -301,6 +301,7 @@ public class CrosswalkActivity extends Activity {
             if (responseCode != 200) {
                 return false;
             }
+
             return true;
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -322,6 +323,7 @@ public class CrosswalkActivity extends Activity {
         mXWalkView.load(mainurl, null);
         Log.e(TAG, "crosswalk");
         serverRunning = true;
+
     }
 
     private void askToRestart() {
@@ -478,12 +480,15 @@ public class CrosswalkActivity extends Activity {
     }
 
 
+
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             if (intent.getAction().equals("dirchange")) {
-                executeSu();
+                Intent minIntent1 = new Intent("open");
+                LocalBroadcastManager.getInstance(CrosswalkActivity.this).sendBroadcast(minIntent1);
+                finish();
             } else if (intent.getAction().equals("crosswalk")) {
 
                 finish();

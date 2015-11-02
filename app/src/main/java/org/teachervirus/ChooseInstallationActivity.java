@@ -1,7 +1,14 @@
 package org.teachervirus;
 
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
@@ -13,6 +20,8 @@ import android.widget.Toast;
 import java.io.File;
 
 import common.utils.FileUtils;
+import services.ServerService;
+import tasks.CommandTask;
 import utils.AppSettings;
 
 public class ChooseInstallationActivity extends AppCompatActivity {
@@ -23,6 +32,7 @@ public class ChooseInstallationActivity extends AppCompatActivity {
     private AppCompatButton btnGo,btnChangePath,btnRetry;
     private AppCompatTextView txtDefaultPath,txtSelectedPath,txtMsg,txtTitle;
     private String selectedPath="";
+    private SharedPreferences preferences;
 
     private void initialise(){
 
@@ -120,11 +130,54 @@ public class ChooseInstallationActivity extends AppCompatActivity {
         if(!file.exists()){
             file.mkdirs();
         }
-        AppSettings.updateRootDirPath(ChooseInstallationActivity.this,path);
+
+        AppSettings.updateRootDirPath(ChooseInstallationActivity.this, path);
+        Intent minIntent1 = new Intent("open");
+        LocalBroadcastManager.getInstance(ChooseInstallationActivity.this).sendBroadcast(minIntent1);
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);
         finish();
+
+
+
+
     }
+
+    private void askToRestart() {
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(ChooseInstallationActivity.this);
+        builder.setTitle("Restart Device");
+        builder.setMessage("Your device needs Restart to apply changes.");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                disableServer();
+
+
+                dialog.dismiss();
+                finish();
+            }
+        });
+
+        builder.show();
+
+    }
+
+    private void disableServer() {
+        NotificationManager notify = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        stopService(new Intent(this, ServerService.class));
+        boolean enableSU = preferences.getBoolean("run_as_root", false);
+        String execName = preferences.getString("use_server_httpd", "lighttpd");
+        String bindPort = preferences.getString("server_port", "8080");
+        CommandTask task = CommandTask.createForDisconnect(this);
+        task.enableSU(enableSU);
+        task.execute();
+
+    }
+
 
     private void setup(boolean retry){
         if(retry){
@@ -148,6 +201,8 @@ public class ChooseInstallationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_installation);
+        preferences = PreferenceManager.
+                getDefaultSharedPreferences(this);
         initialise();
         setup(getIntent().getBooleanExtra("retry",false));
     }

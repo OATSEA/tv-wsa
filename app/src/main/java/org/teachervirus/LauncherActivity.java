@@ -51,7 +51,7 @@ public class LauncherActivity extends AppCompatActivity {
        /* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivityForResult(intent,REQ_CROSS_WALK);
     }
 
@@ -60,7 +60,7 @@ public class LauncherActivity extends AppCompatActivity {
        /* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivityForResult(intent,REQ_WEB_VIEW);
     }
 
@@ -103,6 +103,9 @@ public class LauncherActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter("crosswalk"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("open"));
 
         String ipAddress = Utils.getIPAddress(true);
         if (ipAddress.trim().isEmpty()) {
@@ -210,6 +213,8 @@ public class LauncherActivity extends AppCompatActivity {
             }else if(intent.getAction().equals("stop")){
                 disableServer();
                 finish();
+            }else if(intent.getAction().equals("open")){
+                openBrowser();
             }
         }
     };
