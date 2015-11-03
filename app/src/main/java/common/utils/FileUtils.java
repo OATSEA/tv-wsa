@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
+import utils.AppSettings;
+
 /**
  * Static method for helping user to validates servers configurations
  */
@@ -93,7 +95,17 @@ public class FileUtils {
     }
 
 
-    public static void writeIpAddress(String ipAddress) {
+    public static void writeIpAddress(Context context,String ipAddress) {
+
+        if(!AppSettings.isAccessGranted(context)){
+            ipAddress = "http://" + "localhost" + ":8080";
+        }else{
+            if(ipAddress.trim().isEmpty()){
+                ipAddress = "http://" + "localhost" + ":8080";
+            }else{
+                ipAddress = "http://"+ ipAddress+":8080";
+            }
+        }
 
         File ipFile = new File(FileUtils.getPathToRootDir(), "IP.txt");
         try {

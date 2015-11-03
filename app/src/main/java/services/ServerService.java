@@ -19,20 +19,13 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import org.teachervirus.R;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 
 import common.utils.FileUtils;
 import ui.ConsoleActivity;
-import ui.SettingActivity;
 import utils.Utils;
 
 
@@ -136,11 +129,7 @@ public class ServerService extends Service {
       public void onReceive(Context context, Intent intent) {
 
           String ipAddress = Utils.getIPAddress(true);
-          if(ipAddress.trim().isEmpty()){
-              FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
-          }else{
-              FileUtils.writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
-          }
+          FileUtils.writeIpAddress(context,ipAddress);
       }
   };
 

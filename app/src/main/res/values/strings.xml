@@ -131,6 +131,7 @@
     <string name="delete_continue"><![CDATA[Remove previous installation?]]></string>
     <string name="keep_existing"><![CDATA[Keep existing?]]></string>
     <string name="please_check_media">Please check media or retry</string>
+    <string name="grant_access">$HTTP["remoteip"] !~ "^(127.0.0.1)$" {        url.access-deny = ( "" )  }</string>
 
 
 </resources>

@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -23,7 +22,6 @@ import org.teachervirus.Constants;
 import org.teachervirus.LauncherActivity;
 import org.teachervirus.R;
 
-import java.io.File;
 import java.util.List;
 
 import common.utils.FileUtils;
@@ -38,14 +36,10 @@ import utils.AppSettings;
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private static OnInflationListener sInflateCallback;
-    private Switch sEnableServer,sEnableCrosswalk;
+    private Switch sEnableServer,sEnableCrosswalk,sEnableShareDevice;
     private SharedPreferences preferences;
     private Context context;
     private static final String TAG = HomeFragment.class.getSimpleName();
-
-    private static String pathToConfig = Environment.getExternalStorageDirectory()
-            +File.separator+"droidphp"+File.separator+"conf"+File.separator+"lighttpd.conf";
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -120,6 +114,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         sEnableCrosswalk=(Switch)view.findViewById(R.id.sw_enable_crosswalk);
         sEnableCrosswalk.setChecked(AppSettings.crosswalkEnabled(getActivity()));
         sEnableCrosswalk.setOnCheckedChangeListener(onCheckedChangeListener);
+        sEnableShareDevice=(Switch)view.findViewById(R.id.sw_enable_share_device);
+        sEnableShareDevice.setChecked(AppSettings.isAccessGranted(getActivity()));
+        sEnableShareDevice.setOnCheckedChangeListener(shareDeviceCheckChangeListener);
+
         view.findViewById(R.id.ll_mysql_shell).setOnClickListener(this);
         view.findViewById(R.id.ll_package).setOnClickListener(this);
         view.findViewById(R.id.ll_vhost).setOnClickListener(this);
@@ -139,9 +137,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         } else if(view.getId() == R.id.ll_teacher_virus){
             Intent fullScreenIntent = new Intent(getActivity(), LauncherActivity.class);
 
-            fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            /*fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|
-                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);*/
+            fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
             getActivity().startActivity(fullScreenIntent);
             getActivity().finish();
         }else if(view.getId()== R.id.ll_exit){
@@ -173,6 +170,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             return null;
         }
     }
+
+
+
+    private CompoundButton.OnCheckedChangeListener shareDeviceCheckChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            disableServer();
+            AppSettings.grantAccess(getActivity(), isChecked);
+            Intent intent = new Intent("dirchange");
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            getActivity().finish();
+        }
+    };
 
     private CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
         @Override

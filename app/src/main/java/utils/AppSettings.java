@@ -6,6 +6,8 @@ import android.util.Log;
 import org.teachervirus.BuildConfig;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import common.utils.FileUtils;
 import common.utils.PrefUtil;
@@ -20,6 +22,7 @@ public class AppSettings {
     public static final String KEY_VERSION_NAME = "version_name";
     public static final String KEY_INSTALLATION_DIR = "installation_dir";
     public static final String KEY_CROSSWALk = "crosswalk";
+    public static final String KEY_GRANT_ACCESS = "grant_access";
 
     public static final String DROID_PHP_DIR = "/mnt/sdcard/droidphp";
     public static final String INSTALLATION_DEFAULT_DIR = "/mnt/sdcard/TeacherVirus";
@@ -143,5 +146,60 @@ public class AppSettings {
     public static void setCrosswalkEnable(Context context,boolean enable){
         PrefUtil.putBoolean(context,KEY_SETTINGS,KEY_CROSSWALk,enable);
     }
+
+
+    public static void grantAccess(Context context,boolean allowAccess){
+
+        PrefUtil.putBoolean(context,KEY_SETTINGS,KEY_GRANT_ACCESS,allowAccess);
+        grantAccess(allowAccess);
+        FileUtils.writeIpAddress(context,Utils.getIPAddress(true));
+    }
+
+    public static boolean isAccessGranted(Context context){
+        boolean return_value = false;
+        return_value = PrefUtil.getBoolean(context,KEY_SETTINGS,KEY_GRANT_ACCESS);
+        return return_value;
+    }
+
+
+
+
+    public static  void  grantAccess(boolean enable){
+        try {
+            List<String> lines= org.apache.commons.io.FileUtils.readLines(new File(FileUtils.pathToConfig),"UTF-8");
+
+            for(int i = 0; i<lines.size();i++){
+
+                if(i == 152 || i == 153 || i == 154){
+                    boolean commented =lines.get(i).startsWith("#");
+                    if(enable){
+
+                        if(!commented){
+                            String toreplace = "#"+lines.get(i);
+                            Log.e(TAG,"disable "+toreplace);
+                            lines.remove(i);
+                            lines.add(i,toreplace);
+                        }
+
+                    }else{
+
+                        if(commented){
+                            String toreplace = lines.get(i).replace("#","");
+                            Log.e(TAG,"enable "+toreplace);
+                            lines.remove(i);
+                            lines.add(i,toreplace);
+                        }
+
+                    }
+                }
+            }
+
+            org.apache.commons.io.FileUtils.writeLines(new File(FileUtils.pathToConfig), "UTF-8", lines);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

@@ -108,11 +108,7 @@ public class LauncherActivity extends AppCompatActivity {
                 new IntentFilter("open"));
 
         String ipAddress = Utils.getIPAddress(true);
-        if (ipAddress.trim().isEmpty()) {
-            FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
-        } else {
-            FileUtils.writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
-        }
+        FileUtils.writeIpAddress(this,ipAddress);
         if (!FileUtils.isGetInfectedExists() || !FileUtils.isLoadingSpinnerExists()) {
             FileUtils.copyAssets(LauncherActivity.this);
         }

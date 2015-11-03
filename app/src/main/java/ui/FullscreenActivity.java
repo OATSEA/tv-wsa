@@ -620,11 +620,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private void configServer(){
         showDialog();
         String ipAddress = Utils.getIPAddress(true);
-        if (ipAddress.trim().isEmpty()) {
-            FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
-        } else {
-            FileUtils. writeIpAddress("http://" + Utils.getIPAddress(true) + ":8080");
-        }
+        FileUtils.writeIpAddress(this,ipAddress);
         if(!isGetInfectedExists() || ! isLoadingSpinnerExists()){
             FileUtils.copyAssets(FullscreenActivity.this);
         }

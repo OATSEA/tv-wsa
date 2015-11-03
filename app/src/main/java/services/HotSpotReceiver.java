@@ -4,15 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
-import android.os.Environment;
-import android.util.Log;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 
 import common.utils.FileUtils;
 import utils.Utils;
@@ -36,11 +27,8 @@ public class HotSpotReceiver extends BroadcastReceiver {
             }
 
             String ipAddress = Utils.getIPAddress(true);
-            if(ipAddress.trim().isEmpty()){
-               FileUtils.writeIpAddress("http://" + "localhost" + ":8080");
-            }else{
-                FileUtils.writeIpAddress("http://"+ Utils.getIPAddress(true)+":8080");
-            }
+            FileUtils.writeIpAddress(context,ipAddress);
+
 
         }
     }

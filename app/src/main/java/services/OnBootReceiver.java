@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import common.utils.FileUtils;
 import common.utils.PrefUtil;
 import tasks.CommandTask;
+import utils.Utils;
 
 public class OnBootReceiver extends BroadcastReceiver {
 
@@ -22,7 +23,8 @@ public class OnBootReceiver extends BroadcastReceiver {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 
             PrefUtil.putBoolean(context, "restart", "restart", false);
-            FileUtils.writeIpAddress("http://"+"localhost:8080");
+            String ipAddress = Utils.getIPAddress(true);
+            FileUtils.writeIpAddress(context,ipAddress);
         	final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (preferences.getBoolean("enable_server_on_boot", false)) {
                 
