@@ -139,8 +139,6 @@ public class ChooseInstallationActivity extends AppCompatActivity {
         finish();
 
 
-
-
     }
 
     private void askToRestart() {

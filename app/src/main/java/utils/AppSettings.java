@@ -23,11 +23,14 @@ public class AppSettings {
     public static final String KEY_INSTALLATION_DIR = "installation_dir";
     public static final String KEY_CROSSWALk = "crosswalk";
     public static final String KEY_GRANT_ACCESS = "grant_access";
+    public static final String KEY_RESTART_REQUIRED = "restart";
+
 
     public static final String DROID_PHP_DIR = "/mnt/sdcard/droidphp";
     public static final String INSTALLATION_DEFAULT_DIR = "/mnt/sdcard/TeacherVirus";
     public static final String PLAY_URL = "/play";
     public static final String GETINFECTED_URL = "/getinfected.php";
+    public static boolean serverEnabled = false;
 
     public static String getRootDirPath(Context context){
         String defaultDir = INSTALLATION_DEFAULT_DIR;
@@ -144,7 +147,7 @@ public class AppSettings {
 
     //set crosswalk enable or disabled
     public static void setCrosswalkEnable(Context context,boolean enable){
-        PrefUtil.putBoolean(context,KEY_SETTINGS,KEY_CROSSWALk,enable);
+        PrefUtil.putBoolean(context, KEY_SETTINGS, KEY_CROSSWALk, enable);
     }
 
 
@@ -152,7 +155,7 @@ public class AppSettings {
 
         PrefUtil.putBoolean(context,KEY_SETTINGS,KEY_GRANT_ACCESS,allowAccess);
         grantAccess(allowAccess);
-        FileUtils.writeIpAddress(context,Utils.getIPAddress(true));
+        FileUtils.writeIpAddress(context, Utils.getIPAddress(true));
     }
 
     public static boolean isAccessGranted(Context context){
@@ -162,6 +165,16 @@ public class AppSettings {
     }
 
 
+    public static boolean isRestartRequired(Context context){
+        boolean return_value = false;
+        return_value = PrefUtil.getBoolean(context,KEY_SETTINGS,KEY_RESTART_REQUIRED);
+        return  return_value;
+    }
+
+    public static void restartRequired(Context context, boolean required){
+
+        PrefUtil.putBoolean(context,KEY_SETTINGS,KEY_RESTART_REQUIRED,required);
+    }
 
 
     public static  void  grantAccess(boolean enable){
@@ -200,6 +213,5 @@ public class AppSettings {
             e.printStackTrace();
         }
     }
-
 
 }

@@ -96,7 +96,7 @@ public class FileUtils {
 
 
     public static void writeIpAddress(Context context,String ipAddress) {
-
+        Log.e("FileUtils","New IP : "+ipAddress);
         if(!AppSettings.isAccessGranted(context)){
             ipAddress = "http://" + "localhost" + ":8080";
         }else{
@@ -106,6 +106,7 @@ public class FileUtils {
                 ipAddress = "http://"+ ipAddress+":8080";
             }
         }
+
 
         File ipFile = new File(FileUtils.getPathToRootDir(), "IP.txt");
         try {

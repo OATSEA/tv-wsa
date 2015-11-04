@@ -21,7 +21,6 @@ import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -31,7 +30,6 @@ import java.net.URL;
 import java.util.List;
 
 import common.utils.FileUtils;
-import common.utils.PrefUtil;
 import eu.chainfire.libsuperuser.Shell;
 import services.ServerService;
 import tasks.CommandTask;
@@ -43,23 +41,24 @@ public class WebActivity extends AppCompatActivity {
 
     private static final String TAG = WebActivity.class.getSimpleName();
     private static final int DEFAULT_COUNTDOWN_TIME = 60 * 1000; // one minute
-    private static final int DEFAULT_INTERVAL = 5000; // 5 second
+    private static final int DEFAULT_INTERVAL = 10000; // 5 second
     private WebView webView;
     private SharedPreferences preferences;
     private CountDownTimer countDownTimer;
     private ProgressDialog pDialog;
     private boolean trackTimer = false;
     private boolean serverRunning = false;
+    private boolean serverEnabled = false;
 
     private void initialise() {
 
         webView = (WebView) findViewById(R.id.webView);
-        countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
+
     }
 
 
     private void installAndCheckRepo() {
-
+        showDialog();
         if (preferences.getBoolean("enable_server_on_app_startup", false)) {
             startService(new Intent(WebActivity.this, ServerService.class));
             final boolean enableSU = preferences.getBoolean("run_as_root", false);
@@ -96,10 +95,13 @@ public class WebActivity extends AppCompatActivity {
             @Override
             public void onTaskCompleted() {
 
+                serverEnabled = true;
                 if (FileUtils.ensureLighttpdConfigExists()) {
 
-
-                    AppSettings.updateRootDirPath(WebActivity.this, AppSettings.getRootDirPath(WebActivity.this));
+                    if(FileUtils.getPathToRootDir()!= null
+                            && !FileUtils.getPathToRootDir().equals(AppSettings.getRootDirPath(WebActivity.this))){
+                        AppSettings.updateRootDirPath(WebActivity.this, AppSettings.getRootDirPath(WebActivity.this));
+                    }
 
                     if(!AppSettings.getRootDir(WebActivity.this).exists()){
                         openCheckMedia();
@@ -115,14 +117,18 @@ public class WebActivity extends AppCompatActivity {
     }
 
     private void configServer(){
-        showDialog();
+
         String ipAddress = Utils.getIPAddress(true);
         FileUtils.writeIpAddress(this,ipAddress);
         if(!FileUtils.isGetInfectedExists() || ! FileUtils.isLoadingSpinnerExists()){
             FileUtils.copyAssets(WebActivity.this);
         }
-        countDownTimer.start();
-        trackTimer = true;
+        if(countDownTimer==null){
+            countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
+            countDownTimer.start();
+            trackTimer = true;
+        }
+
     }
 
     private void openCheckMedia(){
@@ -132,7 +138,11 @@ public class WebActivity extends AppCompatActivity {
         finish();
     }
 
-    private void disableServer() {
+    private void disableServer(final boolean requireRestart) {
+        NotificationManager notify = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        stopService(new Intent(this, ServerService.class));
         boolean enableSU = preferences.getBoolean("run_as_root", false);
         String execName = preferences.getString("use_server_httpd", "lighttpd");
         String bindPort = preferences.getString("server_port", "8080");
@@ -140,10 +150,7 @@ public class WebActivity extends AppCompatActivity {
         task.enableSU(enableSU);
         task.execute();
 
-        NotificationManager notify = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        notify.cancel(143);
-        stopService(new Intent(this, ServerService.class));
+
     }
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
 
@@ -224,16 +231,16 @@ public class WebActivity extends AppCompatActivity {
                                 dismissDialog();
                                 if (FileUtils.isInstalled()) {
                                     openPage(AppSettings.PLAY_URL);
-                                    Toast.makeText(WebActivity.this, "installation found", Toast.LENGTH_SHORT).show();
+
                                 } else {
                                     openPage(AppSettings.GETINFECTED_URL);
-                                    Toast.makeText(WebActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
+
                                 }
 
 
                             }
                         });
-                        PrefUtil.putBoolean(WebActivity.this, "restart", "restart", false);
+                        AppSettings.restartRequired(WebActivity.this, false);
                     }
                 }
             }).start();
@@ -255,22 +262,22 @@ public class WebActivity extends AppCompatActivity {
 
                                 if (FileUtils.isInstalled()) {
                                     openPage(AppSettings.PLAY_URL);
-                                    Toast.makeText(WebActivity.this, "installation found", Toast.LENGTH_SHORT).show();
                                 } else {
                                     openPage(AppSettings.GETINFECTED_URL);
-                                    Toast.makeText(WebActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
                                 }
 
                             }
                         });
-                        PrefUtil.putBoolean(WebActivity.this, "restart", "restart", false);
+                        AppSettings.restartRequired(WebActivity.this, true);
                     } else {
+
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
 
                                 try {
-                                    if (PrefUtil.getBoolean(WebActivity.this, "restart", "restart")) {
+                                    if (AppSettings.isRestartRequired(WebActivity.this)) {
                                         askToRestart();
                                     } else {
                                         unknownError();
@@ -334,9 +341,10 @@ public class WebActivity extends AppCompatActivity {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                disableServer();
+                AppSettings.restartRequired(WebActivity.this,true);
+                disableServer(false);
                 dialog.dismiss();
+                setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -353,8 +361,9 @@ public class WebActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                disableServer();
+                disableServer(false);
                 dialog.dismiss();
+                setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -488,7 +497,7 @@ public class WebActivity extends AppCompatActivity {
 
                 finish();
             }else if(intent.getAction().equals("stop")){
-                disableServer();
+                disableServer(true);
                 finish();
             }
         }

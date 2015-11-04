@@ -18,7 +18,6 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkView;
@@ -31,7 +30,6 @@ import java.net.URL;
 import java.util.List;
 
 import common.utils.FileUtils;
-import common.utils.PrefUtil;
 import eu.chainfire.libsuperuser.Shell;
 import services.ServerService;
 import tasks.CommandTask;
@@ -43,23 +41,24 @@ public class CrosswalkActivity extends Activity {
 
     private static final String TAG = CrosswalkActivity.class.getSimpleName();
     private static final int DEFAULT_COUNTDOWN_TIME = 60 * 1000; // one minute
-    private static final int DEFAULT_INTERVAL = 5000; // 5 second
+    private static final int DEFAULT_INTERVAL = 10000; // 5 second
     private XWalkView mXWalkView;
     private SharedPreferences preferences;
     private CountDownTimer countDownTimer;
     private ProgressDialog pDialog;
     private boolean trackTimer = false;
     private boolean serverRunning = false;
+    private boolean serverEnabled = false;
 
     private void initialise() {
 
         mXWalkView = (XWalkView) findViewById(R.id.xwalkWebView);
-        countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
+
     }
 
 
     private void installAndCheckRepo() {
-
+        showDialog();
         if (preferences.getBoolean("enable_server_on_app_startup", false)) {
             startService(new Intent(CrosswalkActivity.this, ServerService.class));
             final boolean enableSU = preferences.getBoolean("run_as_root", false);
@@ -96,11 +95,13 @@ public class CrosswalkActivity extends Activity {
             @Override
             public void onTaskCompleted() {
 
+                serverEnabled = true;
                 if (FileUtils.ensureLighttpdConfigExists()) {
 
-
-                    AppSettings.updateRootDirPath(CrosswalkActivity.this, AppSettings.getRootDirPath(CrosswalkActivity.this));
-
+                    if(FileUtils.getPathToRootDir()!= null
+                            && !FileUtils.getPathToRootDir().equals(AppSettings.getRootDirPath(CrosswalkActivity.this))){
+                        AppSettings.updateRootDirPath(CrosswalkActivity.this, AppSettings.getRootDirPath(CrosswalkActivity.this));
+                    }
 
                     if (!AppSettings.getRootDir(CrosswalkActivity.this).exists()) {
                         openCheckMedia();
@@ -116,14 +117,16 @@ public class CrosswalkActivity extends Activity {
     }
 
     private void configServer() {
-        showDialog();
         String ipAddress = Utils.getIPAddress(true);
         FileUtils.writeIpAddress(this,ipAddress);
         if (!FileUtils.isGetInfectedExists() || !FileUtils.isLoadingSpinnerExists()) {
             FileUtils.copyAssets(CrosswalkActivity.this);
         }
-        countDownTimer.start();
-        trackTimer = true;
+        if(countDownTimer==null){
+            countDownTimer = new MyTimer(DEFAULT_COUNTDOWN_TIME, DEFAULT_INTERVAL);
+            countDownTimer.start();
+            trackTimer = true;
+        }
     }
 
     private void openCheckMedia() {
@@ -133,7 +136,11 @@ public class CrosswalkActivity extends Activity {
         finish();
     }
 
-    private void disableServer() {
+    private void disableServer(final boolean requireRestart) {
+        NotificationManager notify = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notify.cancel(143);
+        stopService(new Intent(this, ServerService.class));
         boolean enableSU = preferences.getBoolean("run_as_root", false);
         String execName = preferences.getString("use_server_httpd", "lighttpd");
         String bindPort = preferences.getString("server_port", "8080");
@@ -141,10 +148,7 @@ public class CrosswalkActivity extends Activity {
         task.enableSU(enableSU);
         task.execute();
 
-        NotificationManager notify = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        notify.cancel(143);
-        stopService(new Intent(this, ServerService.class));
+
     }
 
     private class ConnectionListenerTask extends AsyncTask<Void, String, Boolean> {
@@ -223,16 +227,14 @@ public class CrosswalkActivity extends Activity {
                                 dismissDialog();
                                 if (FileUtils.isInstalled()) {
                                     openPage(AppSettings.PLAY_URL);
-                                    Toast.makeText(CrosswalkActivity.this, "installation found", Toast.LENGTH_SHORT).show();
                                 } else {
                                     openPage(AppSettings.GETINFECTED_URL);
-                                    Toast.makeText(CrosswalkActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
                                 }
 
 
                             }
                         });
-                        PrefUtil.putBoolean(CrosswalkActivity.this, "restart", "restart", false);
+                        AppSettings.restartRequired(CrosswalkActivity.this, false);
                     }
                 }
             }).start();
@@ -254,22 +256,24 @@ public class CrosswalkActivity extends Activity {
 
                                 if (FileUtils.isInstalled()) {
                                     openPage(AppSettings.PLAY_URL);
-                                    Toast.makeText(CrosswalkActivity.this, "installation found", Toast.LENGTH_SHORT).show();
+
                                 } else {
                                     openPage(AppSettings.GETINFECTED_URL);
-                                    Toast.makeText(CrosswalkActivity.this, "installation not found", Toast.LENGTH_SHORT).show();
+
                                 }
 
                             }
                         });
-                        PrefUtil.putBoolean(CrosswalkActivity.this, "restart", "restart", false);
+                        AppSettings.restartRequired(CrosswalkActivity.this,true);
                     } else {
+
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
 
                                 try {
-                                    if (PrefUtil.getBoolean(CrosswalkActivity.this, "restart", "restart")) {
+                                    if (AppSettings.isRestartRequired(CrosswalkActivity.this)) {
                                         askToRestart();
                                     } else {
                                         unknownError();
@@ -330,9 +334,10 @@ public class CrosswalkActivity extends Activity {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PrefUtil.putBoolean(CrosswalkActivity.this, "restart", "restart", true);
-                disableServer();
+               AppSettings.restartRequired(CrosswalkActivity.this,true);
+                disableServer(false);
                 dialog.dismiss();
+                setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -349,8 +354,9 @@ public class CrosswalkActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                disableServer();
+                disableServer(false);
                 dialog.dismiss();
+                setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -489,7 +495,7 @@ public class CrosswalkActivity extends Activity {
 
                 finish();
             } else if (intent.getAction().equals("stop")) {
-                disableServer();
+                disableServer(false);
                 finish();
             }
         }
