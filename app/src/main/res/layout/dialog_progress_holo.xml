@@ -28,7 +28,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="10.0dip"
             android:indeterminate="true"
-            android:indeterminateDrawable="@drawable/spinner"
             android:max="10000" />
 
         <TextView

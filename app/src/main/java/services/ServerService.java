@@ -81,7 +81,7 @@ public class ServerService extends Service {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("DroidPHP service started")
+                        .setContentTitle("TeacherVirus based on DroidPhp service started")
                         .setContentText("Web Service started");
 
         Intent notificationIntent = new Intent(this, ConsoleActivity.class);

@@ -9,7 +9,7 @@
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_launcher"
+        android:drawableLeft="@mipmap/ic_launcher"
         android:gravity="center_vertical"
         android:padding="10.0dip"
         android:textColor="#ff6b9a3e"

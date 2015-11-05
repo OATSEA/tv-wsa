@@ -4,8 +4,6 @@ package tasks;
 import android.content.Context;
 import android.os.AsyncTask;
 
-
-import org.teachervirus.AppController;
 import org.teachervirus.Constants;
 import org.teachervirus.R;
 
@@ -131,7 +129,7 @@ public class CommandTask extends AsyncTask<String, String, String> {
        // setMessage(queryRes[0]);
         if (queryRes[0].equals(COMMAND_EXECUTED)) {
             command_executed = (command_executed == 0) ? R.string.command_executed : command_executed;
-            AppController.toast(mContext, mContext.getString(command_executed));
+
         }
     }
 
