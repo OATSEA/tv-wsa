@@ -47,12 +47,12 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private void openCrosswalk(){
-        Intent intent = new Intent(LauncherActivity.this,CrosswalkActivity.class);
-       /* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
+       /* Intent intent = new Intent(LauncherActivity.this,CrosswalkActivity.class);
+       *//* intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);*//*
 
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivityForResult(intent,REQ_CROSS_WALK);
+        startActivityForResult(intent,REQ_CROSS_WALK);*/
     }
 
     private void openWebView(){

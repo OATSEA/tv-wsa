@@ -1,3 +1,4 @@
+/*
 package org.teachervirus;
 
 import android.app.Activity;
@@ -501,3 +502,4 @@ public class CrosswalkActivity extends Activity {
         }
     };
 }
+*/
