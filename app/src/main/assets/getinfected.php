@@ -2,16 +2,21 @@
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
     error_reporting(E_ALL ^ E_WARNING);
     error_reporting(0);
-    if(file_exists(getcwd().'/data/constants.php'))
+    if(file_exists(getcwd().'/data/bootstrap.php'))
     {
-        require_once(getcwd().'/data/constants.php');
-        $protocol = SITE_URL;
-        if(file_exists(getcwd().'/IP.txt'))
+        require_once(getcwd().'/data/bootstrap.php');
+        if(file_exists(getcwd().'/data/constants.php'))
         {
-            $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
-            $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
-            $protocol = trim($protocol);
+            require_once(getcwd().'/data/constants.php');
+            $protocol = SITE_URL;
+            if(file_exists(getcwd().'/IP.txt'))
+            {
+                $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
+                $protocol = fread($myfile,filesize(getcwd().'/IP.txt'));
+                $protocol = trim($protocol);
+            }
         }
+        $protocol = SITE_URL;
         if(file_exists(getcwd().'/IP.txt'))
         {
             $myfile = fopen(getcwd().'/IP.txt', "r") or die("Unable to open file!");
@@ -295,12 +300,12 @@
                     min-height: 5px;
                     width: 100%;
                 }
-                #loading > h2 {
-                    font-size: 52px;
-                    text-align: center;
-                }
                 .text h2{
                     width: 100%;
+                    text-align: center;
+                }
+                #loading > h2 {
+                    font-size: 55px;
                     text-align: center;
                 }
         </style>
@@ -601,7 +606,7 @@
                 // Check if ip param is set to either an IP address or a url (i.e. without http:// infront)    
                 // $ip="10.1.1.38" or "test.teachervirus.org"
 
-                if(isset($sDeviceAddress) && (!empty($sDeviceAddress)) && $sInfectionResource == "I") {
+                if(isset($sDeviceAddress) && (!empty($sDeviceAddress))) {
                     $ip= $sDeviceAddress;
                     if($debug) {echo "<p>Address has been provided as: $ip</p>"; }
                 } else {
@@ -839,13 +844,13 @@
             }
             else 
             {
-                if ($ip=="no" && $sInfectionResource == "G")
+                if ($ip=="no")
                 {
                     // Download from github zipball/master as no IP address set
                     $geturl = (!empty($sBranchName) && isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "https://github.com/$username/$repo/zipball/$sBranchName/" : "https://github.com/$username/$repo/zipball/master/";
                     $sGetInfectedGetUrl = "https://github.com/$username/getinfected/zipball/master/";
                 }
-                elseif($sInfectionResource == "I")
+                else
                 {
                     // as IP address has been set attempt download from IP address
                    $geturl = empty($nPort) ? "http://$ip/$zipfile" : "http://$ip:$nPort/$zipfile";
@@ -1450,7 +1455,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.4 | TS: 20151020.1637</div>
+                <div class="mandatory">Getinfected - V: 0.4 | B: master | TS: 20151008.0830</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/version.txt"))
