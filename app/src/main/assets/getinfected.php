@@ -1,4 +1,4 @@
-<?php 
+<?php  
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
       error_reporting(E_ALL ^ E_WARNING);
      error_reporting(0);
