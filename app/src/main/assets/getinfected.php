@@ -11,9 +11,9 @@
         $constantpath = $constant[1];
     }
     
-    if(file_exists(getcwd().'/'.$constantpath.'/constants.php'))
+    if(file_exists(getcwd().'/data/'.$constantpath.'/constants.php'))
     {
-        require_once(getcwd().'/'.$constantpath.'/constants.php');
+        require_once(getcwd().'/data/'.$constantpath.'/constants.php');
         $protocol = SITE_URL;
         if(file_exists(getcwd().'/IP.txt'))
         {
@@ -871,9 +871,9 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/UUID/bootstrap.php'))
+                if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
                 {
-                    require(getcwd().'/UUID/bootstrap.php');
+                    require(getcwd().'/data/UUID/bootstrap.php');
                     $protocol = SITE_URL;
                     if(file_exists(getcwd().'/IP.txt'))
                     {
@@ -1172,9 +1172,9 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/UUID/bootstrap.php'))
+                if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
                 {
-                    require(getcwd().'/UUID/bootstrap.php');
+                    require(getcwd().'/data/UUID/bootstrap.php');
                     $protocol = SITE_URL;
                     if(file_exists(getcwd().'/IP.txt'))
                     {
@@ -1192,7 +1192,7 @@
                 }
                 rename(getcwd()."/data/UUID",getcwd().'/data/'.$suuid);
               
-               if (!is_dir(getcwd().'/data/'.$suuid.'/admin')) {
+               if (!is_dir(getcwd().'/data/'.$suuid.'/admin') && isset($_SESSION['pattern_password'])) {
                  //echo "There are Not such a folder";
                     $dir = "admin";
                     mkdir(getcwd().'/data/'.$suuid.'/'.$dir);
@@ -1240,9 +1240,9 @@ if($_SESSION['isValidation']['flag'] == 1)
         $_SESSION['isLoggedIn'] = isset($_SESSION['isLoggedIn']) ? $_SESSION['isLoggedIn'] : FALSE;
         if((is_dir("admin") && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])) || (isset($_GET['isValidUser']) && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])))
         {
-            if(file_exists(getcwd().'/UUID/bootstrap.php'))
+            if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
             {
-                require(getcwd().'/UUID/bootstrap.php');
+                require(getcwd().'/data/UUID/bootstrap.php');
                 $protocol = SITE_URL;
                 if(file_exists(getcwd().'/IP.txt'))
                 {
@@ -1474,7 +1474,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                         <div class="full-widthdebug">
                             <div class="branch-class" style="<?php echo (isset($_GET['b']) && ($_GET['b'] == 1) || (SHOW_TV == 1)) ? 'display:block' : 'display:none';?>">
                                 <div class="text-field">Branch?<font color="red">*</font></div>
-                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'dev'; ?>" name="branch_name" id="branch_name">
+                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/data/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'dev'; ?>" name="branch_name" id="branch_name">
                                     <div class="clear-button">
                                         <input type="button" value="Clear" onclick="removePort('branch_name');"/><br/>
                                     </div>
