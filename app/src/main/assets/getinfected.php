@@ -6,8 +6,8 @@
     if(file_exists('.general.txt'))
     {
         $myfile = fopen('.general.txt', "r") or die("Unable to open file!");
-        $protocol = fread($myfile,filesize('.general.txt'));
-        $constant = explode(';',$protocol);
+        $suuid = fread($myfile,filesize('.general.txt'));
+        $constant = explode(';',$suuid);
         $constantpath = $constant[1];
     }
     
@@ -210,33 +210,33 @@
                     z-index: 100;
                 }
                 .button
-		{
-			color: #fff;
-			text-decoration: none;
-			display: inline-block;
-			padding: 4px 10px;
-			-webkit-border-radius: 5px;
-			font: normal 14px/16px Helvetica, Arial, sans-serif;
-		}
-		
-		.button.black {
-			background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#7d828c),color-stop(0.5, #303749), color-stop(0.5, #121a2e), to(#121a2e));
-			border: 5px solid rgba(255, 255, 255, 1);
+        {
+            color: #fff;
+            text-decoration: none;
+            display: inline-block;
+            padding: 4px 10px;
+            -webkit-border-radius: 5px;
+            font: normal 14px/16px Helvetica, Arial, sans-serif;
+        }
+        
+        .button.black {
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#7d828c),color-stop(0.5, #303749), color-stop(0.5, #121a2e), to(#121a2e));
+            border: 5px solid rgba(255, 255, 255, 1);
                         border-radius: 25px 0 0 25px;
-		}
-		.button.black:hover {
-			background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, 
-				from(#4286f5), 
-				color-stop(0.5, #4286f5),
-				color-stop(0.5, #194fdb),
-				to(#194fdb));
-		}
-		.button.back {
-			position: relative;
-			padding-left: 5px;
-			margin-left: 8px;
-		}
-		.back.black > span {
+        }
+        .button.black:hover {
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, 
+                from(#4286f5), 
+                color-stop(0.5, #4286f5),
+                color-stop(0.5, #194fdb),
+                to(#194fdb));
+        }
+        .button.back {
+            position: relative;
+            padding-left: 5px;
+            margin-left: 8px;
+        }
+        .back.black > span {
                         display: block;
                         height: 20px;
                         width: 20px;
@@ -254,13 +254,13 @@
                                color-stop(0.5, transparent), 
                                to(transparent));
                  }
-		.back:hover > span {
-			background-image: -webkit-gradient(linear, left top, right bottom, 
-				from(#4286f5), 
-				color-stop(0.5, #4286f5),
-				color-stop(0.5, #194fdb),
-				to(#194fdb));
-		}
+        .back:hover > span {
+            background-image: -webkit-gradient(linear, left top, right bottom, 
+                from(#4286f5), 
+                color-stop(0.5, #4286f5),
+                color-stop(0.5, #194fdb),
+                to(#194fdb));
+        }
                 .arrow-left {
                         border-bottom: 30px solid transparent;
                         border-right: 30px solid #fff;
@@ -420,10 +420,21 @@
                     mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
                 );
             }
-            $uuid=gen_uuid();
-            $fuuid="UUID;".$uuid;
-            $myfile = fopen(".general.txt", "w");
-            fwrite($myfile, $fuuid);
+            
+            if (!is_dir(ROOT_DIR."/tv/admin")) 
+            {
+                $suuid=gen_uuid();
+                $fuuid="UUID;".$suuid;
+                $myfile = fopen(".general.txt", "w");
+                fwrite($myfile, $fuuid);
+            }
+            else{
+                
+                $myfile = fopen('.general.txt', "r") or die("Unable to open file!");
+                $suuid = fread($myfile,filesize('.general.txt'));
+                $constant = explode(';',$suuid);
+                $suuid = $constant[1];
+            }
             
             function rrmdir($dir)
             {
@@ -776,7 +787,7 @@
 
                   foreach($fileSPLObjects as $file) {
                     $tally2 ++;
-                        $filename= $file->getFilename();	
+                        $filename= $file->getFilename();    
                         //if($debug) { echo "<p>Current Filename: $filename </p>"; }
 
                         if (($file->isDir())&&(substr( $filename ,0,1) != ".")) {
@@ -1077,7 +1088,7 @@
 
                   foreach($fileSPLObjects as $file) {
                     $tally2 ++;
-                        $filename= $file->getFilename();	
+                        $filename= $file->getFilename();    
                         //if($debug) { echo "<p>Current Filename: $filename </p>"; }
 
                         if (($file->isDir())&&(substr( $filename ,0,1) != ".")) {
@@ -1174,7 +1185,34 @@
                 }
                 echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
-                rename(getcwd()."/UUID",getcwd().'/'.$uuid);
+                
+                if (is_dir(ROOT_DIR."/tv/admin")) 
+                { 
+                    rrmdir($constantpath);
+                }
+                rename(getcwd()."/data/UUID",getcwd().'/data/'.$suuid);
+              
+               if (!is_dir(getcwd().'/data/'.$suuid.'/admin')) {
+                 //echo "There are Not such a folder";
+                    $dir = "admin";
+                    mkdir(getcwd().'/data/'.$suuid.'/'.$dir);
+                    $openfile = fopen(getcwd().'/data/'.$suuid.'/'.$dir.'/username_password.php',"w") or die("Unable to open file!");
+                    $readfile = fread($openfile);
+                    $sPassword = $_SESSION['pattern_password'];
+                    $txt = '<?php
+
+                    //Encrypted UserName and Password
+                    $sUserName = "admin";
+                    $sPassword = "'.$sPassword.'";
+
+                    // Defining UserName and Password to check against credentials
+                    define("USER_NAME", $sUserName);
+                    define("PASSWORD", $sPassword);
+                    ?>';
+                    fwrite($openfile, $txt);
+                } 
+
+                
                 
             } // END Download if zipfile doesn't already exists
         }
@@ -1436,7 +1474,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                         <div class="full-widthdebug">
                             <div class="branch-class" style="<?php echo (isset($_GET['b']) && ($_GET['b'] == 1) || (SHOW_TV == 1)) ? 'display:block' : 'display:none';?>">
                                 <div class="text-field">Branch?<font color="red">*</font></div>
-                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'dev'; ?>" name="branch_name" id="branch_name">
+                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/data/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'dev'; ?>" name="branch_name" id="branch_name">
                                     <div class="clear-button">
                                         <input type="button" value="Clear" onclick="removePort('branch_name');"/><br/>
                                     </div>
@@ -1535,7 +1573,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151208.1630</div>
+                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151211.1655</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/gi-version.txt"))
