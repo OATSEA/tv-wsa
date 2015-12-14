@@ -1,7 +1,7 @@
 <?php 
     if(session_status()!=PHP_SESSION_ACTIVE) session_start();
-      error_reporting(E_ALL ^ E_WARNING);
-     error_reporting(0);
+    error_reporting(E_ALL ^ E_WARNING);
+    error_reporting(0);
     $constantpath = '';
     if(file_exists('.general.txt'))
     {
@@ -11,9 +11,9 @@
         $constantpath = $constant[1];
     }
     
-    if(file_exists(getcwd().'/'.$constantpath.'/constants.php'))
+    if(file_exists(getcwd().'/data/'.$constantpath.'/constants.php'))
     {
-        require_once(getcwd().'/'.$constantpath.'/constants.php');
+        require_once(getcwd().'/data/'.$constantpath.'/constants.php');
         $protocol = SITE_URL;
         if(file_exists(getcwd().'/IP.txt'))
         {
@@ -210,57 +210,57 @@
                     z-index: 100;
                 }
                 .button
-        {
-            color: #fff;
-            text-decoration: none;
-            display: inline-block;
-            padding: 4px 10px;
-            -webkit-border-radius: 5px;
-            font: normal 14px/16px Helvetica, Arial, sans-serif;
-        }
-        
-        .button.black {
-            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#7d828c),color-stop(0.5, #303749), color-stop(0.5, #121a2e), to(#121a2e));
-            border: 5px solid rgba(255, 255, 255, 1);
-                        border-radius: 25px 0 0 25px;
-        }
-        .button.black:hover {
-            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, 
-                from(#4286f5), 
-                color-stop(0.5, #4286f5),
-                color-stop(0.5, #194fdb),
-                to(#194fdb));
-        }
-        .button.back {
-            position: relative;
-            padding-left: 5px;
-            margin-left: 8px;
-        }
-        .back.black > span {
-                        display: block;
-                        height: 20px;
-                        width: 20px;
-                        background-image: -webkit-gradient(linear, left top, right bottom, 
-                               from(#7d828c),
-                               color-stop(0.5, #303749), 
-                               color-stop(0.5, #121a2e), 
-                               to(#121a2e));
-                        border-left: solid 1px rgba(79, 79, 79, 0.75);
-                        border-bottom: solid 1px rgba(79, 79, 79, 0.75);
-                       -webkit-transform: rotate(45deg);
-                       -webkit-mask-image: -webkit-gradient(linear, left bottom, right top, 
-                               from(#000000), 
-                               color-stop(0.5,#000000), 
-                               color-stop(0.5, transparent), 
-                               to(transparent));
-                 }
-        .back:hover > span {
-            background-image: -webkit-gradient(linear, left top, right bottom, 
-                from(#4286f5), 
-                color-stop(0.5, #4286f5),
-                color-stop(0.5, #194fdb),
-                to(#194fdb));
-        }
+                {
+                    color: #fff;
+                    text-decoration: none;
+                    display: inline-block;
+                    padding: 4px 10px;
+                    -webkit-border-radius: 5px;
+                    font: normal 14px/16px Helvetica, Arial, sans-serif;
+                }
+
+                .button.black {
+                    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#7d828c),color-stop(0.5, #303749), color-stop(0.5, #121a2e), to(#121a2e));
+                    border: 5px solid rgba(255, 255, 255, 1);
+                                border-radius: 25px 0 0 25px;
+                }
+                .button.black:hover {
+                    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, 
+                        from(#4286f5), 
+                        color-stop(0.5, #4286f5),
+                        color-stop(0.5, #194fdb),
+                        to(#194fdb));
+                }
+                .button.back {
+                    position: relative;
+                    padding-left: 5px;
+                    margin-left: 8px;
+                }
+                .back.black > span {
+                                display: block;
+                                height: 20px;
+                                width: 20px;
+                                background-image: -webkit-gradient(linear, left top, right bottom, 
+                                       from(#7d828c),
+                                       color-stop(0.5, #303749), 
+                                       color-stop(0.5, #121a2e), 
+                                       to(#121a2e));
+                                border-left: solid 1px rgba(79, 79, 79, 0.75);
+                                border-bottom: solid 1px rgba(79, 79, 79, 0.75);
+                               -webkit-transform: rotate(45deg);
+                               -webkit-mask-image: -webkit-gradient(linear, left bottom, right top, 
+                                       from(#000000), 
+                                       color-stop(0.5,#000000), 
+                                       color-stop(0.5, transparent), 
+                                       to(transparent));
+                         }
+                .back:hover > span {
+                    background-image: -webkit-gradient(linear, left top, right bottom, 
+                        from(#4286f5), 
+                        color-stop(0.5, #4286f5),
+                        color-stop(0.5, #194fdb),
+                        to(#194fdb));
+                }
                 .arrow-left {
                         border-bottom: 30px solid transparent;
                         border-right: 30px solid #fff;
@@ -394,7 +394,7 @@
             else
             {
                 $_SESSION['infection_resource'] = $sInfectionResource;
-                $_SESSION['teachervirus_branch'] = 'dev';
+                $_SESSION['teachervirus_branch'] = 'master';
                 $_SESSION['device_address'] = $sDeviceAddress;
                 $_SESSION['port_number'] = $nPort;
             }
@@ -457,6 +457,11 @@
                  reset($objects); 
                  rmdir($dir);
                } 
+            }
+            
+            if (is_dir(ROOT_DIR."/tv/admin"))
+            {   
+                rrmdir(ROOT_DIR.'/data/'.$constantpath);
             }
             if($bDownloadLatestVersion)
             {
@@ -871,9 +876,9 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/UUID/bootstrap.php'))
+                if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
                 {
-                    require(getcwd().'/UUID/bootstrap.php');
+                    require(getcwd().'/data/UUID/bootstrap.php');
                     $protocol = SITE_URL;
                     if(file_exists(getcwd().'/IP.txt'))
                     {
@@ -890,8 +895,8 @@
                 if ($ip=="no" && $sInfectionResource == "G")
                 {
                     // Download from github zipball/master as no IP address set
-                    $geturl = (!empty($sBranchName) && isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "https://github.com/$username/$repo/zipball/$sBranchName/" : "https://github.com/$username/$repo/zipball/dev/";
-                    $sGetInfectedGetUrl = "https://github.com/$username/getinfected/zipball/dev/";
+                    $geturl = (!empty($sBranchName) && isset($_POST['infection_resource']) && $_POST['infection_resource'] == "branch_value") ? "https://github.com/$username/$repo/zipball/$sBranchName/" : "https://github.com/$username/$repo/zipball/master/";
+                    $sGetInfectedGetUrl = "https://github.com/$username/getinfected/zipball/master/";
                 }
                 elseif($sInfectionResource == "I")
                 {
@@ -1172,9 +1177,9 @@
                 // ** TO DO ***
 
                 // current test stub instead of admin page opens in new window:
-                if(file_exists(getcwd().'/UUID/bootstrap.php'))
+                if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
                 {
-                    require(getcwd().'/UUID/bootstrap.php');
+                    require(getcwd().'/data/UUID/bootstrap.php');
                     $protocol = SITE_URL;
                     if(file_exists(getcwd().'/IP.txt'))
                     {
@@ -1186,13 +1191,10 @@
                 echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
                 
-                if (is_dir(ROOT_DIR."/tv/admin")) 
-                { 
-                    rrmdir($constantpath);
-                }
                 rename(getcwd()."/data/UUID",getcwd().'/data/'.$suuid);
               
-               if (!is_dir(getcwd().'/data/'.$suuid.'/admin')) {
+                if (!is_dir(getcwd().'/data/'.$suuid.'/admin') && isset($_SESSION['pattern_password']))
+                {
                  //echo "There are Not such a folder";
                     $dir = "admin";
                     mkdir(getcwd().'/data/'.$suuid.'/'.$dir);
@@ -1240,9 +1242,9 @@ if($_SESSION['isValidation']['flag'] == 1)
         $_SESSION['isLoggedIn'] = isset($_SESSION['isLoggedIn']) ? $_SESSION['isLoggedIn'] : FALSE;
         if((is_dir("admin") && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])) || (isset($_GET['isValidUser']) && (isset($_SESSION['isLoggedIn']) && !$_SESSION['isLoggedIn'])))
         {
-            if(file_exists(getcwd().'/UUID/bootstrap.php'))
+            if(file_exists(getcwd().'/data/UUID/bootstrap.php'))
             {
-                require(getcwd().'/UUID/bootstrap.php');
+                require(getcwd().'/data/UUID/bootstrap.php');
                 $protocol = SITE_URL;
                 if(file_exists(getcwd().'/IP.txt'))
                 {
@@ -1474,7 +1476,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                         <div class="full-widthdebug">
                             <div class="branch-class" style="<?php echo (isset($_GET['b']) && ($_GET['b'] == 1) || (SHOW_TV == 1)) ? 'display:block' : 'display:none';?>">
                                 <div class="text-field">Branch?<font color="red">*</font></div>
-                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/data/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'dev'; ?>" name="branch_name" id="branch_name">
+                                    <input type="text" value="<?php echo isset($_POST['branch_name']) ? $_POST['branch_name'] : (file_exists(getcwd().'/data/'.$constantpath.'/constants.php')) ? TV_BRANCH : 'master'; ?>" name="branch_name" id="branch_name">
                                     <div class="clear-button">
                                         <input type="button" value="Clear" onclick="removePort('branch_name');"/><br/>
                                     </div>
@@ -1573,7 +1575,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151211.1655</div>
+                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151214.1230</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/gi-version.txt"))
