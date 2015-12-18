@@ -331,20 +331,27 @@
     <body class="main" onload="checkLoaded(false);">
         <div id="loading">
             <?php
-                $sLoadingImg = ((file_exists(getcwd().'/tv/images/loading_spinner.gif')) ? $protocol.'/tv/images/loading_spinner.gif' : ((file_exists(ROOT_DIR.'/tv/images/loading_spinner.gif')) ? $protocol.'/tv/images/loading_spinner.gif' : ''));
+                if (file_exists('version.txt'))
+                {
+                    $sLoadingImg = ((file_exists(getcwd().'/images/loading_spinner.gif')) ? $protocol.'/images/loading_spinner.gif' : ((file_exists(ROOT_DIR.'/images/loading_spinner.gif')) ? $protocol.'/images/loading_spinner.gif' : ''));
+                }
+                else
+                {
+                    $sLoadingImg = ((file_exists(getcwd().'/tv/images/loading_spinner.gif')) ? $protocol.'/tv/images/loading_spinner.gif' : ((file_exists(ROOT_DIR.'/tv/images/loading_spinner.gif')) ? $protocol.'/tv/images/loading_spinner.gif' : ''));
+                }
                 if(!empty($sLoadingImg))
                 {
             ?>
                 <img src="<?php echo $sLoadingImg; ?>">
             <?php
                 } 
-                echo is_dir(ROOT_DIR."/tv/admin") ? "<h2>Updating....</h2>" : "<h2>Installing....</h2>";?>
+                echo is_dir(ROOT_DIR."/admin") ? "<h2>Updating....</h2>" : "<h2>Installing....</h2>";?>
         </div>
     <script>
         checkLoaded(false);
     </script>
 <?php
-    $debug = (isset($_POST['show_debug']) ? $_POST['show_debug'] : (is_dir(ROOT_DIR."/tv/admin") ? DEBUG_TEXT : 1));
+    $debug = (isset($_POST['show_debug']) ? $_POST['show_debug'] : (is_dir(ROOT_DIR."/admin") ? DEBUG_TEXT : 1));
     $bChmod = isset($_POST['chmod']) ? $_POST['chmod'] : 0;
     $_SESSION['chmod'] = $bChmod;
     $installed=0;
@@ -360,10 +367,12 @@
         $nPort = trim($_POST['port_number']);
         $bInfectFiles = isset($_POST["infect_files"]) ? $_POST["infect_files"] : 0;
         $bDeleteData = isset($_POST["delete_data"]) ? $_POST["delete_data"] : 0;
-        $bDeletePayload = isset($_POST['delete_payload']) ? $_POST['delete_payload'] : 0;
-        $bDeleteAdminPayload = isset($_POST['admin_payload']) ? $_POST['admin_payload'] : 0;
+        $bDeleteTv = isset($_POST['delete_tv']) ? $_POST['delete_tv'] : 0;
         $bDeleteContent = isset($_POST['delete_content']) ? $_POST['delete_content'] : 0;
-        $bDeleteUuid = isset($_POST['delete_uuid']) ? $_POST['delete_uuid'] : 0;
+        $bDeleteAdmin = isset($_POST['delete_admin']) ? $_POST['delete_admin'] : 0;
+        $bDeleteInfect = isset($_POST['delete_infect']) ? $_POST['delete_infect'] : 0;
+        $bDeletePlay = isset($_POST['delete_play']) ? $_POST['delete_play'] : 0;
+        
         
         if($_POST['infection_resource'] == 'branch_value')
         {
@@ -428,8 +437,8 @@
                 $myfile = fopen(".general.txt", "w");
                 fwrite($myfile, $fuuid);
             }
-            else{
-                
+            if(is_dir(ROOT_DIR."/tv/admin"))
+            {
                 $myfile = fopen('.general.txt', "r") or die("Unable to open file!");
                 $suuid = fread($myfile,filesize('.general.txt'));
                 $constant = explode(';',$suuid);
@@ -459,7 +468,7 @@
                } 
             }
             
-            if (is_dir(ROOT_DIR."/tv/admin"))
+            if (is_dir(ROOT_DIR."/admin"))
             {   
                 rrmdir(ROOT_DIR.'/data/'.$constantpath);
             }
@@ -470,22 +479,63 @@
                    rrmdir('infect');
                 }
             }
-            if($bDeleteData)
+            if (file_exists('version.txt'))
             {
-                rrmdir('data');
+                if($bRemovePreviousInstall)
+                {   
+                    rrmdir('infect');
+                    rrmdir('data');
+                    rrmdir('content');
+                    rrmdir('tv');
+                    rrmdir('content');
+                    rrmdir('admin');
+                    rrmdir('play');
+                    rrmdir('payloads');
+                    rrmdir('css');
+                    rrmdir('js');
+                    rrmdir('images');
+                    unlink('index.php');
+                    unlink('index.html');
+                    unlink('.README.md');
+                    unlink('version.txt');
+                }
             }
-            if($bDeletePayload)
+            else
             {
-                rrmdir('content');
+                if($bRemovePreviousInstall)
+                {   
+                    rrmdir('infect');
+                    rrmdir('data');
+                    rrmdir('content');
+                    rrmdir('tv');
+                    rrmdir('content');
+                    rrmdir('admin');
+                    rrmdir('play');
+                }
+                if($bDeleteAdmin)
+                {
+                    rrmdir('admin');
+                }
+                if($bDeleteContent)
+                {
+                    rrmdir('content');
+                }
+                if($bDeleteData)
+                {
+                    rrmdir('data');
+                }
+                if($bDeletePlay)
+                {
+                    rrmdir('play');
+                }
+                if($bDeleteTv)
+                {
+                    rrmdir('tv');
+                }
+                
             }
-            if($bDeleteAdminPayload)
-            {
-                rrmdir('tv');
-            }   
-            if($bDeleteContent)
-            {
-                rrmdir('content');
-            }
+               
+           
             //}
             // getinfected.php is the initial teacher virus PHP infection script that is used to install the core Teacher Virus files.
             // Created: May 2015
@@ -887,7 +937,8 @@
                         $protocol = trim($protocol);
                     }
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; 
+                $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
             }
             else 
@@ -1188,11 +1239,17 @@
                         $protocol = trim($protocol);
                     }
                 }
-                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; $_SESSION['isValidation']['flag'] = FALSE;
+                echo '<h2>Infection Complete!</h2><h2><a href="'.$protocol.'/tv/admin/buttons"> Next . . </a></h2>'; 
+                $_SESSION['isValidation']['flag'] = FALSE;
                 $installed=1;
                 
                 rename(getcwd()."/data/UUID",getcwd().'/data/'.$suuid);
-              
+                if($bRemovePreviousInstall)
+                {   
+                    session_start();
+                    session_destroy();
+                    session_unset();exit;
+                }
                 if (!is_dir(getcwd().'/data/'.$suuid.'/admin') && isset($_SESSION['pattern_password']))
                 {
                  //echo "There are Not such a folder";
@@ -1213,9 +1270,6 @@
                     ?>';
                     fwrite($openfile, $txt);
                 } 
-
-                
-                
             } // END Download if zipfile doesn't already exists
         }
     }
@@ -1298,15 +1352,18 @@ if($_SESSION['isValidation']['flag'] == 1)
                 if(boxId == "remove_previous_install")
                 {
                     document.getElementById("delete_data").checked = true;
-                    document.getElementById("delete_payload").checked = true;
-                    document.getElementById("admin_payload").checked = true;
+                    document.getElementById("delete_tv").checked = true;
                     document.getElementById("delete_content").checked = true;
-                    document.getElementById("delete_uuid").checked = true;
+                    document.getElementById("delete_admin").checked = true;
+                    document.getElementById("delete_infect").checked = true;
+                    document.getElementById("delete_play").checked = true;
+                    
                     document.getElementById("delete_data").value = 1;
-                    document.getElementById("delete_payload").value = 1;
-                    document.getElementById("admin_payload").value = 1;
+                    document.getElementById("delete_tv").value = 1;
                     document.getElementById("delete_content").value = 1;
-                    document.getElementById("delete_uuid").value = 1;
+                    document.getElementById("delete_admin").value = 1;
+                    document.getElementById("delete_infect").value = 1;
+                    document.getElementById("delete_play").value = 1;
                 }
                 if(boxId == "download_latest_version")
                 {
@@ -1350,22 +1407,25 @@ if($_SESSION['isValidation']['flag'] == 1)
                 if(isInstalledInfect == 1)
                 {
                     document.getElementById("delete_data").checked = false;
-                    document.getElementById("delete_payload").checked = false;
-                    document.getElementById("admin_payload").checked = false;
+                    document.getElementById("delete_tv").checked = false;
                     document.getElementById("delete_content").checked = false;
-                    document.getElementById("delete_uuid").checked = false;
+                    document.getElementById("delete_admin").checked = false;
+                    document.getElementById("delete_infect").checked = false;
+                    document.getElementById("delete_play").checked = false;
+                    
                     document.getElementById("delete_data").value = 0;
-                    document.getElementById("delete_payload").value = 0;
-                    document.getElementById("admin_payload").value = 0;
+                    document.getElementById("delete_tv").value = 0;
                     document.getElementById("delete_content").value = 0;
-                    document.getElementById("delete_uuid").value = 0;
+                    document.getElementById("delete_admin").value = 0;
+                    document.getElementById("delete_infect").value = 0;
+                    document.getElementById("delete_play").value = 0;
                 }
             }
             window.onload = function ()
             {
                 showData("<?php echo isset($_POST['infection_resource']) ? $_POST['infection_resource'] : (INFECTED_RESOURCE == "G") ? 'branch_value' : 'infected_device'; ?>");
                 showMain("<?php echo isset($_POST['setting_value']) ? $_POST['setting_value'] : ''?>");
-                disableDelete("<?php echo is_dir(ROOT_DIR."/tv/admin") ? 1 : 0; ?>")
+                disableDelete("<?php echo is_dir(ROOT_DIR."/admin") ? 1 : 0; ?>")
             }
             function toggleVisibility(id,inputid) 
             {
@@ -1399,7 +1459,7 @@ if($_SESSION['isValidation']['flag'] == 1)
             }
         </script>
     <?php 
-        if (is_dir(ROOT_DIR."/tv/admin")) 
+        if (is_dir(ROOT_DIR."/admin")) 
         {
     ?>  
         <link href="<?php echo $protocol; ?>/tv/css/font-awesome/css/font-awesome.min.css" rel="stylesheet">
@@ -1415,7 +1475,7 @@ if($_SESSION['isValidation']['flag'] == 1)
         <div id="container">
             <div class="payload-details">
                 <?php 
-                    echo is_dir(ROOT_DIR."/tv/admin/") ? "<div class='text'><h2>Update Teacher Virus</h2></div>" : "<div class='text'><h2>Ready to Get Infected?</h2></div>";
+                    echo is_dir(ROOT_DIR."/admin/") ? "<div class='text'><h2>Update Teacher Virus</h2></div>" : "<div class='text'><h2>Ready to Get Infected?</h2></div>";
                 ?>
             </div>
             <div class="full-widthdebug">
@@ -1423,38 +1483,51 @@ if($_SESSION['isValidation']['flag'] == 1)
             </div>
             <div id="main" style="display:none">
                 <?php 
-                if (is_dir(ROOT_DIR."/tv/admin")) 
+                if (is_dir(ROOT_DIR."/admin")) 
                 {
                 ?>
                     <div class="full-widthdebug">
                         <input type="button" value="Update Get Infected ?" onclick="location.href='tv/api/updategetinfected/';">
                     </div>
                     <div class="full-widthdebug">
+                    <?php
+                    	if (file_exists('version.txt'))
+                        { 
+                    ?>
+                        <h4>New version of teacher virus is available update new version v5.0</h4>    
+                        <div class="text-field" style="display: none;">
+                            <b>Remove Current Installation?</b>
+                            <input type="checkbox" name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('remove_previous_install');">
+                        </div>
+                    <?php } else { ?>
                         <div class="text-field">
                             <b>Remove Current Installation?</b>
-                            <input type="checkbox" name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '0' : '1'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
+                            <input type="checkbox"name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
                         </div>
                     </div>
                     <div class="full-widthdebug">
                         <input type="button" id="show_delete_option" value="Show Options" onclick="toggleDeleteFile('delete_file','show_delete_option');">
                     </div>
                     <div id="delete_file" style="display:none">
+                        
                         <div class="full-widthdebug">
-                            <input type="checkbox" name="delete_data" id="delete_data" value="<?php echo isset($_POST['delete_data']) ? $_POST['delete_data'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_data']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_data');" >Delete Data
-                        </div>
-                        <div class="full-widthdebug">
-                            <input type="checkbox" name="delete_payload" id="delete_payload" value="<?php echo isset($_POST['delete_payload']) ? $_POST['delete_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_payload');">Delete Infect
-                        </div>
-                        <div class="full-widthdebug">
-                            <input type="checkbox" name="admin_payload" id="admin_payload" value="<?php echo isset($_POST['admin_payload']) ? $_POST['admin_payload'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['admin_payload']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('admin_payload');">Delete Tv
+                            <input type="checkbox" name="delete_admin" id="delete_admin" value="<?php echo isset($_POST['delete_admin']) ? $_POST['delete_admin'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_admin']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_admin');" >Delete Admin
                         </div>
                         <div class="full-widthdebug">
                             <input type="checkbox" name="delete_content" id="delete_content" value="<?php echo isset($_POST['delete_content']) ? $_POST['delete_content'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_content']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_content');" >Delete Content
                         </div>
                         <div class="full-widthdebug">
-                            <input type="checkbox" name="delete_uuid" id="delete_uuid" value="<?php echo isset($_POST['delete_uuid']) ? $_POST['delete_uuid'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_uuid']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_uuid');" >Delete UUID
+                            <input type="checkbox" name="delete_data" id="delete_data" value="<?php echo isset($_POST['delete_data']) ? $_POST['delete_data'] : empty($_POST) ? '0' : '1'; ?>" <?php echo isset($_POST['delete_data']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_data');" >Delete Data
                         </div>
-                        
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_infect" id="delete_infect" value="<?php echo isset($_POST['delete_infect']) ? $_POST['delete_infect'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_infect']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_infect');" >Delete Infect
+                        </div>
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_play" id="delete_play" value="<?php echo isset($_POST['delete_play']) ? $_POST['delete_play'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_play']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_play');" >Delete Play
+                        </div>
+                        <div class="full-widthdebug">
+                            <input type="checkbox" name="delete_tv" id="delete_tv" value="<?php echo isset($_POST['delete_tv']) ? $_POST['delete_tv'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['delete_tv']) ? "checked='checked'" : empty($_POST) ? "checked = 'checked'" : ''; ?> onclick="changeValue('delete_tv');">Delete Tv
+                        </div>
                     </div>
                     <div class="full-widthdebug">
                         <div class="text-field">
@@ -1463,7 +1536,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                         </div>
                     </div>
                 <?php
-                }
+                } }
                 ?>
                 <div id="infection_sources">
                     <div class="full-widthdebug">
@@ -1516,7 +1589,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <div style="display: none">
                         <div class="full-chmod">
                             <?php 
-                                if(!is_dir(ROOT_DIR."/tv/admin"))
+                                if(!is_dir(ROOT_DIR."/admin"))
                                 {
                             ?>
                                     <div>
@@ -1544,7 +1617,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 ?>
                         <div class="full-chmod">
                             <?php 
-                                if(!is_dir(ROOT_DIR."/tv/admin"))
+                                if(!is_dir(ROOT_DIR."/admin"))
                                 {
                             ?>
                                     <div>
@@ -1575,7 +1648,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151216.1100</div>
+                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151218.1300</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/gi-version.txt"))
