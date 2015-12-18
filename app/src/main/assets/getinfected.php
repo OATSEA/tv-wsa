@@ -447,8 +447,7 @@
             
             function rrmdir($dir)
             {
-            
-               if (is_dir($dir)) { 
+                if (is_dir($dir)) { 
                  $objects = scandir($dir); 
                  foreach ($objects as $object) { 
                    if ($object != "." && $object != "..") { 
@@ -1351,12 +1350,12 @@ if($_SESSION['isValidation']['flag'] == 1)
                 }
                 if(boxId == "remove_previous_install")
                 {
-                    document.getElementById("delete_data").checked = true;
-                    document.getElementById("delete_tv").checked = true;
-                    document.getElementById("delete_content").checked = true;
-                    document.getElementById("delete_admin").checked = true;
-                    document.getElementById("delete_infect").checked = true;
-                    document.getElementById("delete_play").checked = true;
+//                    document.getElementById("delete_data").checked = true;
+//                    document.getElementById("delete_tv").checked = true;
+//                    document.getElementById("delete_content").checked = true;
+//                    document.getElementById("delete_admin").checked = true;
+//                    document.getElementById("delete_infect").checked = true;
+//                    document.getElementById("delete_play").checked = true;
                     
                     document.getElementById("delete_data").value = 1;
                     document.getElementById("delete_tv").value = 1;
@@ -1502,7 +1501,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                     <?php } else { ?>
                         <div class="text-field">
                             <b>Remove Current Installation?</b>
-                            <input type="checkbox"name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '1' : '0'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
+                            <input type="checkbox"name="remove_previous_install" id="remove_previous_install" value="<?php echo isset($_POST['remove_previous_install']) ? $_POST['remove_previous_install'] : empty($_POST) ? '0' : '1'; ?>" <?php echo isset($_POST['remove_previous_install']) ? "checked='checked'" : empty($_POST) ? "" : "checked = 'checked'"; ?> onclick="changeValue('remove_previous_install');">
                         </div>
                     </div>
                     <div class="full-widthdebug">
@@ -1648,7 +1647,7 @@ if($_SESSION['isValidation']['flag'] == 1)
                 <input type="button" name="button" id="button" value="GO!" align="center" onclick="checkLoaded(true);">  
             </div><br/>
             <div class="full-widthdebug">
-                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151218.1300</div>
+                <div class="mandatory">Getinfected - V: 0.5 | TS: 20151218.1445</div>
             </div>
             <?php
                 if(file_exists(ROOT_DIR."/gi-version.txt"))
